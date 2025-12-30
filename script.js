@@ -19,15 +19,15 @@ let shipData = {
     coords: { status: "NAV DATA CORRUPTED" }
 };
 
-// FULL CREW DATABASE (Retained for Personnel screen)
+// FULL CREW DATABASE (Image paths updated from "assets/..." to "...")
 const PLAYER_PROFILES = {
-     // NOTE: Please ensure these image files (e.g., aronus_zeebal.png) exist in your 'assets/' folder
+     // NOTE: Image files are now expected in the same directory as script.js
      1: {Name: "Aronus Zeebal", Expertise: "Ship Captain, Command", Photo: "aronus_zeebal.png", Record: "Fleet Captain C. P. Shepard, age 62, began their exemplary career by graduating at the top of their class from the Mars Naval Space Academy with a focus on Advanced Astrogation. Immediately following graduation, Shepard was recruited by the interplanetary conglomerate, ERIDANUS CORE, preferring the path of corporate logistics and deep-space resource acquisition over traditional military service. Shepard’s ascent through the ranks was swift and steady, a testament to their exceptional command presence and unmatched operational efficiency. Their sustained high performance led to the prestigious command of a Pilgrim-class vessel, a position they have held for 30 consecutive years. This extensive tenure is underscored by an immaculate service record, entirely free of mission failures or disciplinary actions. Shepard embodies the ideal ERIDANUS CORE officer: highly competent, strategically brilliant, and unwaveringly dedicated to the corporation's expansion across the Eridani sector.", Status: "Active"},
      2: {Name: "Robert Slim", Expertise: "First Officer, Astrogation", Photo: "robert_slim.png", Record: "Robert Slim is a distinguished graduate of the SolSys Command School and has served as First Officer on various Pilgrim-class freighters for the past seven years. Known for his exceptional navigational acumen and fastidious adherence to flight protocols, he is considered the model of next-generation corporate efficiency. His primary duties include maintaining all flight logs, validating course trajectories, and serving as Captain Zeebal’s direct operational superior. This mission is crucial for his career advancement, as he is formally positioned as the Captain’s successor upon Zeebal’s scheduled retirement. Slim maintains zero-tolerance for operational anomalies and is committed to ensuring the Pilgrim completes its trajectory to the Eridani sector with maximum efficiency, protecting the integrity of the official mission logs at all costs.", Status: "Active"},
      3: {Name: "Kaatrin Rheema", Expertise: "Ship Engineer", Photo: "kaatrin_rheema.png", Record: "Kaatrin Rheema is the Chief Engine Systems Specialist and has been personally responsible for maintaining the hyperdrive and thermal dynamics of the Pilgrim-class for over five cycles. A technical savant with an engineering background in advanced fluid dynamics, her expertise is considered irreplaceable for this deep-space voyage. Her duties include managing all plasma conduit integrity, monitoring power regulation systems, and ensuring the absolute stability of the hyperdrive synchronization matrix. Rheema is noted for her technical brilliance and objective, results-oriented approach; her loyalty is directed exclusively toward the flawless function of the ship’s complex machinery. Any system failure is considered a professional affront, and she has full command authority over all technical personnel and resources necessary for rapid, on-site diagnostics and repair.", Status: "Active"},
      4: {Name: "Mathias Mendelsonne", Expertise: "Corp. Private Security, Asset Protection", Photo: "mathias_mendelsonne.png", Record: "Agent Mendelsonne is onboard the Pilgrim on a dual-mandate mission. He has twelve years of service in the Corporate Security Force military police, providing a highly disciplined and procedural focus on his duties, despite an early honorable discharge leading to immediate contract renewal with the CPS's Black Ops sector. His primary function is to ensure the secure transit of High-Value Detainee Prisoner and provide Tier-4 asset protection for the ship's engine core and navigation array, designated under Icarus Protocol Compliance. His extensive knowledge of ZDC infiltration tactics is critical for countering potential sabotage. Access to his full CSF and SAD records is strictly controlled by HR Key (Level 9) due to the classified nature of his past operations, and he is fully authorized to use lethal force in defense of corporate assets.", Status: "Active"},
-     5: {Name: "Sarooji Arunberg", Expertise: "Police Detective", Photo: "sarooji_arunberg.png", Record: "Detective Sarooji Arunberg is a Detective 1st Grade with the Orbital Police Division (OPD), specializing in complex financial and data crime compliance. Her presence on the Pilgrim is a matter of official mandate: she is assigned as the independent law enforcement auditor for the Eridanus Corporation's high-value resource acquisition mission. Arunberg’s duties are twofold: first, she is responsible for maintaining the security and integrity of the high-profile prisoner transfer involving white-collar criminal Elara Voss, working alongside Corporate Private Security to ensure no unauthorized interference occurs. Second, upon arrival at the Eridani sector, she is tasked with conducting a transparent, government-mandated audit of the newly acquired corporate s and infrastructure, ensuring full compliance with interplanetary regulatory law and serving as an external check on corporate activities. She operates with full independent authority but is committed to supporting the Captain and crew in the execution of the mission parameters.", Status: "Active"},
-     6: {Name: "Clark Stubel", Expertise: "External Compliance Auditor", Photo: "clark_stubel.png", Record: "Clark Stubel is traveling under the authority of the Coalition for Fair Resource Allocation, a non-profit organization dedicated to monitoring deep-space exploratory missions for ethical resource hoarding and regulatory compliance. His extensive knowledge of ZDC infiltration tactics is critical for countering potential sabotage. Access to his full CSF and SAD records is strictly controlled by HR Key (Level 9) due to the classified nature of his past operations, and he is fully authorized to use lethal force in defense of corporate assets.", Status: "Active"},
+     5: {Name: "Sarooji Arunberg", Expertise: "Police Detective", Photo: "sarooji_arunberg.png", Record: "Detective Sarooji Arunberg is a Detective 1st Grade with the Orbital Police Division (OPD), specializing in complex financial and data crime compliance. Her presence on the Pilgrim is a matter of official mandate: she is assigned as the independent law enforcement auditor for the Eridanus Corporation's high-value resource acquisition mission. Arunberg’s duties are twofold: first, she is responsible for maintaining the security and integrity of the high-profile prisoner transfer involving white-collar criminal Elara Voss, working alongside Corporate Private Security to ensure no unauthorized interference occurs. Second, upon arrival at the Eridani sector, she is tasked with conducting a transparent, government-mandated audit of the newly acquired corporate assets and infrastructure, ensuring full compliance with interplanetary regulatory law and serving as an external check on corporate activities. She operates with full independent authority but is committed to supporting the Captain and crew in the execution of the mission parameters.", Status: "Active"},
+     6: {Name: "Clark Stubel", Expertise: "External Compliance Auditor", Photo: "clark_stubel.png", Record: "Clark Stubel is traveling under the authority of the Coalition for Fair Resource Allocation, a non-profit organization dedicated to monitoring deep-space exploratory missions for ethical resource hoarding and regulatory compliance. His official function is to observe the Pilgrim's acquisition protocols and verify that the Eridanus Corporation adheres to all agreements established in the Sol-Eridani Treaty. His extensive knowledge of ZDC infiltration tactics is critical for countering potential sabotage. Access to his full CSF and SAD records is strictly controlled by HR Key (Level 9) due to the classified nature of his past operations, and he is fully authorized to use lethal force in defense of corporate assets.", Status: "Active"},
      7: {Name: "Ren Smith", Expertise: "Communications Technician", Photo: "ren_smith.png", Record: "Ren is a specialized communications technician brought aboard to manage and maintain the Pilgrim’s experimental long-range comms array. His official expertise lies in low-level signal decryption and relay diagnostics. His mission is highly technical and passive, focused solely on ensuring the communication systems remain optimized for mission reports and corporate data transmission. He reports directly to the First Officer on all matters concerning the comms array's functionality. Rix maintains a clean security profile and has no authorization to access core ship operating systems or classified data. He is considered a replaceable, high-skilled laborer, essential for the comms array maintenance but otherwise separate from core crew operations.", Status: "Active"},
      8: {Name: "Sooren Wandara", Expertise: "Experimental Shielding Specialist", Photo: "sooren_wandara.png", Record: "Sooren Wandara is a specialist contracted through the Corporation's Environmental Risk Assessment (ERA) division. His official role is to operate and maintain the Pilgrim's Experimental Adaptive Shielding System (EASS)—a highly volatile, manually operated defense system designed to protect against unexpected micrometeoroid impacts in the deep Eridani sector. Wandara is noted for his physical resilience and specific training in high-G environment stabilization, making him essential for manual recalibrations of the EASS array. He has no authority over personnel but is granted priority access to the hull maintenance bays and specialized tools necessary to execute his technical defense duties. This specialized, high-risk technical expertise ensures his necessary presence on the voyage.", Status: "Active"},
      9: {Name: "Graython Coates", Expertise: "Corporation Boardmember", Photo: "graython_coates.png", Record: "Mr. Graython Coates is a Senior Board Director for the Eridanus Corporation, accompanying the mission as the official representative of the corporate leadership. His duties include certifying the mission's financial and logistical execution, ensuring compliance with shareholder mandates, and providing executive oversight for the transition of the Pilgrim into a permanent corporate asset upon arrival at the Eridani sector. He holds executive-level clearance over all non-operational aspects of the mission and reports directly to the corporate board. His presence ensures maximum accountability and integrity for this high-value endeavor. It is imperative that all crew members treat Mr. Coates with the deference due his rank and cooperate fully with any requests related to mission oversight and compliance.", Status: "Active"},
@@ -54,7 +54,7 @@ let navUnlocked = false;
 let o2DynamicInterval; 
 let o2RecoveryStarted = false; 
 
-// --- NAVIGATION LOGIC ---
+// --- NAVIGATION LOGIC (Remains the same) ---
 function switchScreen(screenName) {
     document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
     document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
@@ -95,48 +95,10 @@ async function typeText(text, delay) {
     await sleep(delay * 300); 
 }
 
-// --- GLITCH EFFECT LOGIC ---
-/**
- * Applies a visual glitch/seizure effect to the whole page and recovers.
- * @param {number} duration - The duration in milliseconds the main effect lasts.
- */
-async function glitchEffect(duration = 200) {
-    const body = document.body;
-    
-    // 1. Apply the seizure class immediately
-    body.classList.remove('glitch-transition');
-    body.classList.add('glitch-active');
-
-    // 2. Wait for the main duration of the effect
-    await sleep(duration);
-    
-    // 3. Start the smooth transition back
-    body.classList.add('glitch-transition');
-    body.classList.remove('glitch-active');
-    
-    // 4. Wait for the transition to finish before cleaning up
-    await sleep(200); 
-    body.classList.remove('glitch-transition');
-}
-
-
-// --- COMMAND PROMPT LOGIC ---
+// --- NEW COMMAND PROMPT LOGIC ---
 async function executeCommand() {
-    
     const input = commandInputEl.value.trim().toUpperCase();
     commandInputEl.value = '';
-    
-    const parts = input.split(' ');
-    const command = parts[0];
-    
-    // --- CONDITIONAL GLITCH CHECK ---
-    const glitchCommands = ['HELP', 'REBOOT', 'DIAGNOSTICS'];
-    
-    if (glitchCommands.includes(command)) {
-        // Wait for the visual effect to complete before proceeding
-        await glitchEffect(150); 
-    }
-    // ------------------------------------
 
     if (input) {
          appendToLog(`> ${input}`); 
@@ -144,10 +106,13 @@ async function executeCommand() {
 
     let response = "";
     
+    const parts = input.split(' ');
+    const command = parts[0];
     const code = parts[1]; 
 
     switch (command) {
         case 'HELP':
+            // SECRET CODE ALERT: Removed FIXENGINESNOW and FIXHULLNOW from help.
             response = "// AVAILABLE COMMANDS:\n// HELP: Display this list.\n// STATUS: Display current ship systems report.\n// CLEAR: Clear the terminal output.\n// DIAGNOSTICS: Run full systems diagnostic.\n// NAVLOG: Display current navigation clues.\n// CREW: List active crew IDs.\n// O2 LEVEL: Detailed life support reading.\n// COMMS: Check communication link status.\n// REBOOT: Attempt system soft-reboot.\n// EXECUTE <code>: Initiates repair/jump protocols (See Engineering Manuals for repair codes).";
             break;
         case 'STATUS':
@@ -241,7 +206,7 @@ async function executeCommand() {
     }
 }
 
-// --- ASYNC REPAIR LOGIC FUNCTIONS ---
+// --- ASYNC REPAIR LOGIC FUNCTIONS (Image paths updated) ---
 
 async function applyEngineFixLogic() {
     if (shipData.engine.status.includes("FAILURE")) {
@@ -255,6 +220,7 @@ async function applyEngineFixLogic() {
         
         const engineImage = document.getElementById('engineStatusImage');
         if (engineImage) {
+            // Path corrected
             engineImage.src = "shipenginesfixed.png"; 
             engineImage.style.borderColor = "var(--primary-color)"; 
         }
@@ -276,6 +242,7 @@ async function applyHullFixLogic() {
         
         const hullImage = document.getElementById('hullStatusImage');
         if (hullImage) {
+            // Path corrected
             hullImage.src = "shipimage2.png";
             hullImage.style.borderColor = "var(--primary-color)"; 
         }
@@ -287,7 +254,7 @@ async function applyHullFixLogic() {
 }
 
 
-// --- O2, DASHBOARD, NAV, PERSONNEL LOGIC ---
+// --- O2, DASHBOARD, NAV, PERSONNEL LOGIC (Image paths updated) ---
 
 function startO2LogicLoop() {
     if (o2DynamicInterval) return;
@@ -505,12 +472,14 @@ function getPersonnelFile(idStr) {
     
     if(isNaN(id) || id < 1 || id > 12) {
         display.innerText = "// ERROR: INVALID ID";
+        // Path corrected
         photoEl.src = "default_profile.png"; 
         return;
     }
 
     const p = PLAYER_PROFILES[id];
 
+    // Path corrected
     photoEl.src = p.Photo || "default_profile.png"; 
     
     let content = `ID: ${id}\nNAME: ${p.Name}\nSTATUS: ${p.Status}\nEXPERT: ${p.Expertise}\n`;
@@ -528,39 +497,6 @@ function getPersonnelFile(idStr) {
     display.innerText = content;
 }
 
-// --- MOBILE ACCESS RESTRICTION LOGIC ---
-function isMobileDevice() {
-    // Basic check for common mobile device width/user agents
-    return window.matchMedia("(max-width: 768px)").matches || 
-           /Mobi|Android/i.test(navigator.userAgent);
-}
-
-function restrictMobileNav() {
-    if (isMobileDevice()) {
-        // Switch to the Personnel screen immediately
-        switchScreen('personnel');
-
-        const navButtons = document.querySelectorAll('.nav-btn');
-        // The buttons are: [0] Status, [1] Nav Core, [2] Personnel, [3] Engineering
-        
-        // Disable all buttons except Personnel (index 2)
-        navButtons.forEach((button, index) => {
-            if (index !== 2) { 
-                button.disabled = true;
-                button.style.opacity = 0.4;
-                button.style.cursor = 'not-allowed';
-                button.setAttribute('title', 'Access Restricted on Mobile Device');
-            } else {
-                // Ensure Personnel button is functional and active
-                button.disabled = false;
-                button.classList.add('active');
-            }
-        });
-
-        appendToLog("[SECURITY] MOBILE ACCESS DETECTED. ALL CONSOLES EXCEPT PERSONNEL ARE RESTRICTED.");
-    }
-}
-
 // --- INIT ---
 window.onload = function() {
     startO2LogicLoop();
@@ -568,9 +504,6 @@ window.onload = function() {
     displaySectorScan();
     updateDashboard();
     
-    // NEW: Check and restrict navigation for mobile users
-    restrictMobileNav();
-
     appendToLog("PILGRIM OS v1.2 // SYSTEM ONLINE. TYPE 'HELP' FOR ASSISTANCE."); 
     commandInputEl.focus(); 
 };
