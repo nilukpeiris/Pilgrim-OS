@@ -19,7 +19,7 @@ let shipData = {
     coords: { status: "NAV DATA CORRUPTED" }
 };
 
-// FULL CREW DATABASE (Image paths updated from "assets/..." to "...")
+// FULL CREW DATABASE 
 const PLAYER_PROFILES = {
      // NOTE: Image files are now expected in the same directory as script.js
      1: {Name: "Aronus Zeebal", Expertise: "Ship Captain, Command", Photo: "aronus_zeebal.png", Record: "Fleet Captain C. P. Shepard, age 62, began their exemplary career by graduating at the top of their class from the Mars Naval Space Academy with a focus on Advanced Astrogation. Immediately following graduation, Shepard was recruited by the interplanetary conglomerate, ERIDANUS CORE, preferring the path of corporate logistics and deep-space resource acquisition over traditional military service. Shepard’s ascent through the ranks was swift and steady, a testament to their exceptional command presence and unmatched operational efficiency. Their sustained high performance led to the prestigious command of a Pilgrim-class vessel, a position they have held for 30 consecutive years. This extensive tenure is underscored by an immaculate service record, entirely free of mission failures or disciplinary actions. Shepard embodies the ideal ERIDANUS CORE officer: highly competent, strategically brilliant, and unwaveringly dedicated to the corporation's expansion across the Eridani sector.", Status: "Active"},
@@ -95,10 +95,48 @@ async function typeText(text, delay) {
     await sleep(delay * 300); 
 }
 
-// --- NEW COMMAND PROMPT LOGIC ---
+// --- GLITCH EFFECT LOGIC ---
+/**
+ * Applies a visual glitch/seizure effect to the whole page and recovers.
+ * @param {number} duration - The duration in milliseconds the main effect lasts.
+ */
+async function glitchEffect(duration = 200) {
+    const body = document.body;
+    
+    // 1. Apply the seizure class immediately
+    body.classList.remove('glitch-transition');
+    body.classList.add('glitch-active');
+
+    // 2. Wait for the main duration of the effect
+    await sleep(duration);
+    
+    // 3. Start the smooth transition back
+    body.classList.add('glitch-transition');
+    body.classList.remove('glitch-active');
+    
+    // 4. Wait for the transition to finish before cleaning up
+    await sleep(200); 
+    body.classList.remove('glitch-transition');
+}
+
+
+// --- COMMAND PROMPT LOGIC ---
 async function executeCommand() {
+    
     const input = commandInputEl.value.trim().toUpperCase();
     commandInputEl.value = '';
+    
+    const parts = input.split(' ');
+    const command = parts[0];
+    
+    // --- CONDITIONAL GLITCH CHECK ---
+    const glitchCommands = ['HELP', 'REBOOT', 'DIAGNOSTICS'];
+    
+    if (glitchCommands.includes(command)) {
+        // Wait for the visual effect to complete before proceeding
+        await glitchEffect(150); 
+    }
+    // ------------------------------------
 
     if (input) {
          appendToLog(`> ${input}`); 
@@ -106,13 +144,10 @@ async function executeCommand() {
 
     let response = "";
     
-    const parts = input.split(' ');
-    const command = parts[0];
     const code = parts[1]; 
 
     switch (command) {
         case 'HELP':
-            // SECRET CODE ALERT: Removed FIXENGINESNOW and FIXHULLNOW from help.
             response = "// AVAILABLE COMMANDS:\n// HELP: Display this list.\n// STATUS: Display current ship systems report.\n// CLEAR: Clear the terminal output.\n// DIAGNOSTICS: Run full systems diagnostic.\n// NAVLOG: Display current navigation clues.\n// CREW: List active crew IDs.\n// O2 LEVEL: Detailed life support reading.\n// COMMS: Check communication link status.\n// REBOOT: Attempt system soft-reboot.\n// EXECUTE <code>: Initiates repair/jump protocols (See Engineering Manuals for repair codes).";
             break;
         case 'STATUS':
@@ -497,12 +532,49 @@ function getPersonnelFile(idStr) {
     display.innerText = content;
 }
 
+// --- MOBILE ACCESS RESTRICTION LOGIC ---
+function isMobileDevice() {
+    // Basic check for common mobile device width/user agents
+    return window.matchMedia("(max-width: 768px)").matches || 
+           /Mobi|Android/i.test(navigator.userAgent);
+}
+
+function restrictMobileNav() {
+    if (isMobileDevice()) {
+        // Switch to the Personnel screen immediately
+        switchScreen('personnel');
+
+        const navButtons = document.querySelectorAll('.nav-btn');
+        // The buttons are: [0] Status, [1] Nav Core, [2] Personnel, [3] Engineering
+        
+        // Disable all buttons except Personnel (index 2)
+        navButtons.forEach((button, index) => {
+            if (index !== 2) { 
+                button.disabled = true;
+                button.style.opacity = 0.4;
+                button.style.cursor = 'not-allowed';
+                button.setAttribute('title', 'Access Restricted on Mobile Device');
+            } else {
+                // Ensure Personnel button is functional and active
+                button.disabled = false;
+                button.classList.add('active');
+            }
+        });
+
+        appendToLog("[SECURITY] MOBILE ACCESS DETECTED. ALL CONSOLES EXCEPT PERSONNEL ARE RESTRICTED.");
+    }
+}
+
+
 // --- INIT ---
 window.onload = function() {
     startO2LogicLoop();
     displayCrewList();
     displaySectorScan();
     updateDashboard();
+
+    // NEW: Check and restrict navigation for mobile users
+    restrictMobileNav();
     
     appendToLog("PILGRIM OS v1.2 // SYSTEM ONLINE. TYPE 'HELP' FOR ASSISTANCE."); 
     commandInputEl.focus(); 
