@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pilgrim Ship Console OS v1.2</title>
+    <link rel="stylesheet" href="style.css">
+    <script defer src="script.js"></script>
+</head>
+<body>
+
+    <div id="console-container">
+        
+        <header>
+            <h1>PILGRIM CLASS FREIGHTER // OPS</h1>
+            <div class="clock"><span id="time">12:11:12 AM</span></div>
+        </header>
+
+        <div id="viewport">
+            
+            <div id="screen-dashboard" class="screen active">
+                <div>
+                    <div class="icon-status-grid">
+                        <div class="icon-card" id="hullIconCard">
+                            <span class="icon-symbol">&#9876;</span>
+                            <div class="icon-label">Hull Integrity</div>
+                            <div class="icon-status-text" id="hullStatus">SEAL BREACH</div>
+                        </div>
+                        <div class="icon-card" id="engineIconCard">
+                            <span class="icon-symbol">&#9888;</span>
+                            <div class="icon-label">Engine Core</div>
+                            <div class="icon-status-text" id="engineStatus">CRITICAL FAILURE</div>
+                        </div>
+                        <div class="icon-card wide" id="o2IconCard">
+                            <span class="icon-symbol">&#9877;</span>
+                            <div class="icon-label">Life Support (O2)</div>
+                            <div class="gauge-container"><div class="gauge-fill" id="o2Gauge"></div></div>
+                            <div class="icon-status-text" id="o2Value">75.0%</div>
+                        </div>
+                        <div class="icon-card" id="commsIconCard">
+                            <span class="icon-symbol">&#9992;</span>
+                            <div class="icon-label">Comms Array</div>
+                            <div class="icon-status-text" id="commsStatus">OFFLINE</div>
+                        </div>
+                        <div class="icon-card" id="coordIconCard">
+                            <span class="icon-symbol">&#9734;</span>
+                            <div class="icon-label">Coordinates</div>
+                            <div class="icon-status-text" id="coordStatus">NAV DATA CORRUPTED</div>
+                        </div>
+                    </div>
+                    
+                    <div id="log-container">
+                        <pre id="terminalLog">// LOG CLEARED.</pre>
+                        <div class="command-prompt">
+                            <span>></span>
+                            <input type="text" id="commandInput" placeholder="ENTER COMMAND..." onkeydown="if(event.key === 'Enter') executeCommand()">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="screen-nav" class="screen">
+                <h2>NAVIGATIONAL CORE // ASTROGATION</h2>
+                
+                <div id="nav-main-grid">
+                    
+                    <div class="nav-left-column">
+                        <div class="status-card">
+                            <h3>SECTOR MAPPING DATA</h3>
+                            <pre id="navScanOutput"></pre>
+                        </div>
+
+                        <div class="status-card" style="margin-top: 20px;">
+                            <h3>DEFRAG CLUES (Target Coordinates)</h3>
+                            <ul id="navClues"></ul>
+                        </div>
+                    </div>
+                    
+                    <div class="nav-right-column">
+                        <div id="navLogicPanel" class="status-card">
+                            <h3>COORDINATE LOGIC SYSTEM</h3>
+                            <p>Fill in the required coordinates to unlock the final destination input.</p>
+                            <div style="margin-top: 10px;">
+                                <label for="sector2">Sector 2 Content:</label>
+                                <input type="text" id="sector2">
+                            </div>
+                            <div style="margin-top: 5px;">
+                                <label for="sector6">Sector 6 Content:</label>
+                                <input type="text" id="sector6">
+                            </div>
+                            <div style="margin-top: 5px;">
+                                <label for="sector10">Sector 10 Content:</label>
+                                <input type="text" id="sector10">
+                            </div>
+                            <button class="action-btn" onclick="sectorLogicGame()">VERIFY LOGIC</button>
+                        </div>
+
+                        <div id="navFinalPanel" style="display: none; margin-top: 20px;">
+                            <div class="status-card">
+                                <h3>JUMP COORDINATE INPUT</h3>
+                                <p>NAV Core Logic Verified. Enter the 4-digit JUMP Code and press JUMP.</p>
+                                <input type="text" id="finalCoordsInput" placeholder="XXXX" style="width: 150px; margin-top: 10px;">
+                                <button class="action-btn" onclick="accessNav(document.getElementById('finalCoordsInput').value)">INITIATE JUMP</button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div id="screen-personnel" class="screen">
+                <h2>PERSONNEL FILES // CREW ROSTER</h2>
+                <div id="personnel-main-grid">
+                    
+                    <div class="status-card">
+                        <h3>ACTIVE ROSTER</h3>
+                        <ul id="crewList" style="list-style-type: none; padding: 0;"></ul>
+                    </div>
+
+                    <div class="status-card personnel-file-card">
+                        <h3>ACCESS PERSONNEL FILE</h3>
+                        <div class="personnel-content-grid">
+                            <div class="personnel-photo-area">
+                                <div id="photoContainer">
+                                    <img id="personnelPhoto" src="assets/default_profile.png" alt="Crew Photo">
+                                </div>
+                                <div class="access-controls">
+                                    <input type="text" id="personnelIdInput" placeholder="ENTER ID (1-12)">
+                                    <button class="action-btn" onclick="getPersonnelFile(document.getElementById('personnelIdInput').value)">ACCESS</button>
+                                </div>
+                            </div>
+                            <div class="personnel-text-display">
+                                <pre id="personnelFileDisplay">// ENTER ID TO RETRIEVE FILE...</pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="screen-engineering" class="screen">
+                <h2>MAIN ENGINEERING // DIAGNOSTICS</h2>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; height: 100%;">
+                    
+                    <div class="engineering-column">
+                        <div class="status-card">
+                            <h3>PLASMA CONDUITS (AUX)</h3>
+                            <img id="engineStatusImage" 
+                                 src="assets/shipenginesdamaged.png" 
+                                 alt="Damaged Engine Schematic" 
+                                 style="max-width: 100%; height: auto; display: block; margin-top: 10px; border: 1px dashed var(--alert-color);">
+                        </div>
+                        <p style="font-size: 0.8rem; opacity: 0.7; text-align: center;">Engine Array Status: <span id="eng-status-display">CRITICAL FAILURE</span>. Repair codes must be obtained and entered via the System Status terminal.</p>
+                    </div>
+
+                    <div class="engineering-column">
+                        <div class="status-card" id="hull-diagram-container">
+                            <h3>FORE SECTION DIAGRAM</h3>
+                            <img id="hullStatusImage" src="assets/shipimage1.png" alt="Hull Breach Diagram">
+                        </div>
+                        <p style="font-size: 0.8rem; opacity: 0.7; text-align: center;">Hull Breach Status: <span id="hull-status-display">SEAL BREACH - FORE SECTION</span>. Seal codes must be obtained and entered via the System Status terminal.</p>
+                    </div>
+                </div>
+            </div>
+            </div>
+
+        <nav id="nav-bar">
+            <button class="nav-btn active" onclick="switchScreen('dashboard')">Status</button>
+            <button class="nav-btn" onclick="switchScreen('nav')">Nav Core</button>
+            <button class="nav-btn" onclick="switchScreen('personnel')">Personnel</button>
+            <button class="nav-btn" onclick="switchScreen('engineering')">Engineering</button>
+        </nav>
+    </div>
+    
+    <div id="vertical-scanline"></div>
+
+</body>
+</html>
