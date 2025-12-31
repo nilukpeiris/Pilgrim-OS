@@ -19,7 +19,8 @@
         <div id="viewport">
             
             <div id="screen-dashboard" class="screen active">
-                <div>
+                <div class="dashboard-content-grid">
+                    
                     <div class="icon-status-grid">
                         <div class="icon-card" id="hullIconCard">
                             <span class="icon-symbol">&#9876;</span>
@@ -31,7 +32,7 @@
                             <div class="icon-label">Engine Core</div>
                             <div class="icon-status-text" id="engineStatus">CRITICAL FAILURE</div>
                         </div>
-                        <div class="icon-card wide" id="o2IconCard">
+                        <div class="icon-card" id="o2IconCard">
                             <span class="icon-symbol">&#9877;</span>
                             <div class="icon-label">Life Support (O2)</div>
                             <div class="gauge-container"><div class="gauge-fill" id="o2Gauge"></div></div>
@@ -48,7 +49,7 @@
                             <div class="icon-status-text" id="coordStatus">NAV DATA CORRUPTED</div>
                         </div>
                     </div>
-                    
+
                     <div id="log-container">
                         <pre id="terminalLog">// LOG CLEARED.</pre>
                         <div class="command-prompt">
@@ -72,17 +73,17 @@
 
                         <div id="navLogicPanel" class="status-card" style="margin-top: 20px;">
                             <h3>COORDINATE LOGIC SYSTEM</h3>
-                            <p>Fill in the required coordinates to unlock the final destination input.</p>
+                            <p style="font-size: 0.8rem;">Fill in the required coordinates to unlock the final destination input.</p>
                             <div style="margin-top: 10px;">
-                                <label for="sector2">Sector 2 Content:</label>
+                                <label for="sector2" style="font-size: 0.8rem;">Sector 2 Content:</label>
                                 <input type="text" id="sector2">
                             </div>
                             <div style="margin-top: 5px;">
-                                <label for="sector6">Sector 6 Content:</label>
+                                <label for="sector6" style="font-size: 0.8rem;">Sector 6 Content:</label>
                                 <input type="text" id="sector6">
                             </div>
                             <div style="margin-top: 5px;">
-                                <label for="sector10">Sector 10 Content:</label>
+                                <label for="sector10" style="font-size: 0.8rem;">Sector 10 Content:</label>
                                 <input type="text" id="sector10">
                             </div>
                             <button class="action-btn" onclick="sectorLogicGame()">VERIFY LOGIC</button>
