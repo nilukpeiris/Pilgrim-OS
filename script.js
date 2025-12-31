@@ -32,8 +32,8 @@ const PLAYER_PROFILES = {
      8: {Name: "Sooren Wandara", Expertise: "Experimental Shielding Specialist", Photo: "sooren_wandara.png", Record: "Sooren Wandara is a specialist contracted through the Corporation's Environmental Risk Assessment (ERA) division. His official role is to operate and maintain the Pilgrim's Experimental Adaptive Shielding System (EASS)—a highly volatile, manually operated defense system designed to protect against unexpected micrometeoroid impacts in the deep Eridani sector. Wandara is noted for his physical resilience and specific training in high-G environment stabilization, making him essential for manual recalibrations of the EASS array. He has no authority over personnel but is granted priority access to the hull maintenance bays and specialized tools necessary to execute his technical defense duties. This specialized, high-risk technical expertise ensures his necessary presence on the voyage.", Status: "Active"},
      9: {Name: "Graython Coates", Expertise: "Corporation Boardmember", Photo: "graython_coates.png", Record: "Mr. Graython Coates is a Senior Board Director for the Eridanus Corporation, accompanying the mission as the official representative of the corporate leadership. His duties include certifying the mission's financial and logistical execution, ensuring compliance with shareholder mandates, and providing executive oversight for the transition of the Pilgrim into a permanent corporate asset upon arrival at the Eridani sector. He holds executive-level clearance over all non-operational aspects of the mission and reports directly to the corporate board. His presence ensures maximum accountability and integrity for this high-value endeavor. It is imperative that all crew members treat Mr. Coates with the deference due his rank and cooperate fully with any requests related to mission oversight and compliance.", Status: "Active"},
      10: {Name: "Bela Rovinskaia", Expertise: "Convict", Photo: "bela_rovinskaia.png", Record: "Bela Rovinskaia is currently being transported under maximum security protocols to the Delta-7 Penal Colony to stand trial for egregious acts of deep-space tax evasion and unauthorized corporate data extraction. A former high-ranking financial analyst for the Eridanus Corporation, Rovinskaia was apprehended attempting to liquidate substantial company assets and siphon funds into untraceable orbital accounts. Her containment is mandated by the Orbital Police Division and secured by Corporate Private Security, requiring a Tier-3 security clearance (Agent Mendelsonne is the primary custodian). The official reason for her transfer aboard the Pilgrim is to minimize public exposure of the criminal case and ensure the rapid restitution of stolen funds. Any attempt to communicate with, free, or otherwise interfere with Detainee Rovinskaia is punishable by full corporate law and will be treated as an act of treason and obstruction of justice.", "Status": "Active"},
-     11: {Name: "Unassigned", Expertise: "N/A", Photo: "default_profile.png", "Record": "Status Unknown. Cryo-pod 11 life signs flickering.", "Status": "Unknown"},
-     12: {Name: "Unassigned", Expertise: "N/A", Photo: "default_profile.png", "Record": "Status Unknown. Cryo-pod 12 breach alarm triggered.", "Status": "Unknown"}
+     11: {Name: "Unassigned", Expertise: "N/A", Photo: "corp_logo.gif", "Record": "Status Unknown. Cryo-pod 11 life signs flickering.", "Status": "Unknown"},
+     12: {Name: "Unassigned", Expertise: "N/A", Photo: "corp_logo.gif", "Record": "Status Unknown. Cryo-pod 12 breach alarm triggered.", "Status": "Unknown"}
 };
 
 // FULL NAV PUZZLE DATA (Retained for Nav screen)
@@ -505,17 +505,20 @@ function getPersonnelFile(idStr) {
     const display = document.getElementById('personnelFileDisplay');
     const photoEl = document.getElementById('personnelPhoto'); 
     
+    // Updated default image path to corp_logo.gif
+    const DEFAULT_PHOTO_PATH = "corp_logo.gif";
+    
     if(isNaN(id) || id < 1 || id > 12) {
         display.innerText = "// ERROR: INVALID ID";
-        // Path corrected
-        photoEl.src = "default_profile.png"; 
+        // Corrected Path
+        photoEl.src = DEFAULT_PHOTO_PATH; 
         return;
     }
 
     const p = PLAYER_PROFILES[id];
 
-    // Path corrected
-    photoEl.src = p.Photo || "default_profile.png"; 
+    // Use the correct path as a fallback if p.Photo is missing or empty
+    photoEl.src = p.Photo || DEFAULT_PHOTO_PATH; 
     
     let content = `ID: ${id}\nNAME: ${p.Name}\nSTATUS: ${p.Status}\nEXPERT: ${p.Expertise}\n`;
     
