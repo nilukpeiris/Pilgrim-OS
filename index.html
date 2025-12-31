@@ -70,14 +70,7 @@
                             <pre id="navScanOutput"></pre>
                         </div>
 
-                        <div class="status-card" style="margin-top: 20px;">
-                            <h3>DEFRAG CLUES (Target Coordinates)</h3>
-                            <ul id="navClues"></ul>
-                        </div>
-                    </div>
-                    
-                    <div class="nav-right-column">
-                        <div id="navLogicPanel" class="status-card">
+                        <div id="navLogicPanel" class="status-card" style="margin-top: 20px;">
                             <h3>COORDINATE LOGIC SYSTEM</h3>
                             <p>Fill in the required coordinates to unlock the final destination input.</p>
                             <div style="margin-top: 10px;">
@@ -102,6 +95,13 @@
                                 <input type="text" id="finalCoordsInput" placeholder="XXXX" style="width: 150px; margin-top: 10px;">
                                 <button class="action-btn" onclick="accessNav(document.getElementById('finalCoordsInput').value)">INITIATE JUMP</button>
                             </div>
+                        </div>
+                    </div>
+                    
+                    <div class="nav-right-column">
+                        <div class="status-card">
+                            <h3>DEFRAG CLUES (Target Coordinates)</h3>
+                            <ul id="navClues"></ul>
                         </div>
                     </div>
 
