@@ -489,52 +489,75 @@ input[type="text"]:focus {
         grid-template-columns: 1fr; /* Stack vertically */
         gap: 15px;
         overflow-y: auto; /* Allow scrolling for the whole panel */
+        min-width: 0; 
+        box-sizing: border-box;
     }
     
-    /* FIX 1: Ensure the file card takes 100% width and has no height constraint in stacked mode */
+    /* 1a. FIX: Ensure the file card takes 100% width and has no height constraint in stacked mode */
     .personnel-file-card {
-        width: 100%; /* Ensure it occupies 100% of the grid column */
+        width: 100%; 
         height: auto;
+        box-sizing: border-box;
     }
 
     /* 2. PERSONNEL: Stack Photo/Controls above File Text Output */
     .personnel-content-grid {
         grid-template-columns: 1fr; /* Stack Photo/Controls and Text Display */
         gap: 15px;
+        min-width: 0; 
+        box-sizing: border-box;
     }
 
-    /* 3. PERSONNEL: Adjust photo container height for mobile */
+    /* 3. PERSONNEL: Adjust photo container height for mobile and guarantee width */
     #photoContainer {
         width: 100%;
-        height: 200px; /* Reduced height to save screen space */
-        margin-top: 0; /* Ensure no unwanted margin on top */
+        max-width: 100%;
+        height: 200px; 
+        margin-top: 0; 
+        box-sizing: border-box;
     }
     
     /* 4. PERSONNEL: Maximize height of the photo within the container */
     #personnelPhoto {
-        object-fit: contain; /* Scales the image to fit entirely, prioritizing height */
-        margin: 0 auto; /* Center the contained image */
+        object-fit: contain; 
+        margin: 0 auto; 
     }
     
-    /* FIX 2: Text output fix to prevent horizontal overflow and maximize space */
+    /* 5. PERSONNEL: Text output fix to prevent horizontal overflow and maximize space */
     .personnel-text-display {
         width: 100%; 
-        min-width: 0; /* Critical: Allows content to shrink rather than push */
+        min-width: 0; 
         box-sizing: border-box;
         max-width: 100%; 
-        padding: 0; /* Remove padding from parent if it was causing issues */
+        padding: 0; 
     }
     
-    /* FIX 3: Ensure the inner text element is full width and handles wrap */
+    /* 6. PERSONNEL: Ensure the inner text element is full width and handles wrap */
     #personnelFileDisplay {
         width: 100%; 
         box-sizing: border-box;
-        padding: 10px; /* Restore padding here */
+        padding: 10px; 
+        max-width: 100%; 
     }
-
+    
     /* Optional: Stack Nav Core grid on mobile too for better viewing */
     #nav-main-grid {
         grid-template-columns: 1fr;
+    }
+    
+    /* === NEW FIX: NAV BAR STACKING (FOOTER) === */
+    #nav-bar {
+        flex-wrap: wrap; /* Allows buttons to drop to the next line */
+        justify-content: center; /* Center buttons when they wrap */
+        height: auto; /* Allow the nav bar to grow in height for two rows */
+        padding-top: 5px; /* Reduce padding for stacked layout */
+    }
+
+    .nav-btn {
+        flex-basis: 48%; /* Each button takes up slightly less than 50% */
+        margin: 5px 2px; /* Add vertical margin for spacing between rows */
+        padding: 8px 5px; /* Adjust padding to save horizontal space */
+        font-size: 0.8rem; /* Slightly smaller font to fit more text */
     }
 }
 
