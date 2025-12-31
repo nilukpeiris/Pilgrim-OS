@@ -477,6 +477,27 @@ input[type="text"]:focus {
     100% { transform: translateY(110vh); } 
 }
 
+/* --- RESPONSIVE OVERRIDES (MOBILE/SMALL SCREENS) --- */
+@media (max-width: 700px) {
+    /* 1. Stack Main Personnel Content */
+    #personnel-main-grid {
+        /* Changes from 300px 1fr (two columns) to 1fr (one stacked column) */
+        grid-template-columns: 1fr;
+    }
+
+    /* 2. Stack Photo and Details Text */
+    .personnel-content-grid {
+        /* Changes from 180px 1fr (two columns) to 1fr (one stacked column) */
+        grid-template-columns: 1fr;
+    }
+
+    /* Make the photo container a reasonable height in the stacked view */
+    #photoContainer {
+        height: 300px;
+        margin-bottom: 10px;
+    }
+}
+
 /* --- NEW: GLITCH/SEIZURE EFFECT STYLES (REVISED) --- */
 body.glitch-active {
     /* Increased distortion and added hue rotation */
