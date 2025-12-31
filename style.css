@@ -315,7 +315,7 @@ input[type="text"]:focus {
 /* END: CSS */
 
 
-/* --- SCREEN: PERSONNEL --- */
+/* --- SCREEN: PERSONNEL (DESKTOP) --- */
 #personnel-main-grid {
     display: grid;
     grid-template-columns: 300px 1fr;
@@ -479,22 +479,38 @@ input[type="text"]:focus {
 
 /* --- RESPONSIVE OVERRIDES (MOBILE/SMALL SCREENS) --- */
 @media (max-width: 700px) {
-    /* 1. Stack Main Personnel Content */
+    /* Reduce padding for smaller screens */
+    .screen {
+        padding: 5px;
+    }
+
+    /* 1. PERSONNEL: Stack the main two boxes (Roster above File Access) */
     #personnel-main-grid {
-        /* Changes from 300px 1fr (two columns) to 1fr (one stacked column) */
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr; /* Stack vertically */
+        gap: 15px;
+        overflow-y: auto; /* Allow scrolling for the whole panel */
+    }
+    
+    /* 1a. PERSONNEL: Override fixed height from desktop for stacked cards */
+    .personnel-file-card {
+        height: auto;
     }
 
-    /* 2. Stack Photo and Details Text */
+    /* 2. PERSONNEL: Stack Photo/Controls above File Text Output */
     .personnel-content-grid {
-        /* Changes from 180px 1fr (two columns) to 1fr (one stacked column) */
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr; /* Stack Photo/Controls (originally 180px) and Text Display (originally 1fr) */
+        gap: 15px;
     }
 
-    /* Make the photo container a reasonable height in the stacked view */
+    /* 3. PERSONNEL: Give the photo container 100% width and a reasonable height */
     #photoContainer {
-        height: 300px;
-        margin-bottom: 10px;
+        width: 100%;
+        height: 250px;
+    }
+    
+    /* Optional: Stack Nav Core grid on mobile too for better viewing */
+    #nav-main-grid {
+        grid-template-columns: 1fr;
     }
 }
 
