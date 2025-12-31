@@ -17,7 +17,9 @@ body {
     padding: 0;
     height: 100vh; /* Full viewport height */
     width: 100vw;
-    overflow: hidden; /* DISABLE SCROLLING (handled by internal elements) */
+    /* FIX 1: Allow vertical scroll (which happens in .screen), but hide horizontal overflow at the root */
+    overflow-y: hidden; 
+    overflow-x: hidden; 
     display: flex;
     flex-direction: column;
     
@@ -30,7 +32,7 @@ body {
     display: grid;
     grid-template-rows: 60px 1fr 100px; /* Header, Main Content, Footer/Nav */
     height: 100%;
-    padding: 20px;
+    padding: 20px; /* Desktop padding */
     box-sizing: border-box;
     gap: 20px;
     background: radial-gradient(circle at center, #0b1624 0%, #050a10 100%);
@@ -479,9 +481,27 @@ input[type="text"]:focus {
 
 /* --- RESPONSIVE OVERRIDES (MOBILE/SMALL SCREENS) --- */
 @media (max-width: 700px) {
+    /* FIX 2: Reduce main container padding to prevent overflow */
+    #console-container {
+        padding: 10px; 
+        width: 100%;
+        box-sizing: border-box;
+    }
+
     /* Reduce padding for smaller screens */
     .screen {
         padding: 5px;
+    }
+    
+    /* FIX 3: Ensure icon status grid doesn't force min width */
+    .icon-status-grid {
+        flex-wrap: wrap; /* Allow status cards to wrap if too many */
+        min-width: 0;
+    }
+    
+    .icon-card {
+        flex-basis: 48%; /* Adjust for 2 cards per row on mobile */
+        margin-bottom: 10px;
     }
 
     /* 1. PERSONNEL: Stack the main two boxes (Roster above File Access) */
@@ -489,7 +509,7 @@ input[type="text"]:focus {
         grid-template-columns: 1fr; /* Stack vertically */
         gap: 15px;
         overflow-y: auto; /* Allow scrolling for the whole panel */
-        min-width: 0; 
+        min-width: 0; /* CRITICAL: Allows grid to shrink to 100% on mobile */
         box-sizing: border-box;
     }
     
@@ -512,21 +532,21 @@ input[type="text"]:focus {
     #photoContainer {
         width: 100%;
         max-width: 100%;
-        height: 200px; 
+        height: 200px; /* Reduced height to save screen space */
         margin-top: 0; 
         box-sizing: border-box;
     }
     
     /* 4. PERSONNEL: Maximize height of the photo within the container */
     #personnelPhoto {
-        object-fit: contain; 
+        object-fit: contain; /* Scales the image to fit entirely, prioritizing height */
         margin: 0 auto; 
     }
     
     /* 5. PERSONNEL: Text output fix to prevent horizontal overflow and maximize space */
     .personnel-text-display {
         width: 100%; 
-        min-width: 0; 
+        min-width: 0; /* CRITICAL: Allows content to shrink */
         box-sizing: border-box;
         max-width: 100%; 
         padding: 0; 
@@ -536,25 +556,25 @@ input[type="text"]:focus {
     #personnelFileDisplay {
         width: 100%; 
         box-sizing: border-box;
-        padding: 10px; 
+        padding: 10px; /* Restore padding here */
         max-width: 100%; 
     }
-    
+
     /* Optional: Stack Nav Core grid on mobile too for better viewing */
     #nav-main-grid {
         grid-template-columns: 1fr;
     }
     
-    /* === NEW FIX: NAV BAR STACKING (FOOTER) === */
+    /* === NAV BAR STACKING (FOOTER) === */
     #nav-bar {
         flex-wrap: wrap; /* Allows buttons to drop to the next line */
-        justify-content: center; /* Center buttons when they wrap */
+        justify-content: space-around; /* Space them out */
         height: auto; /* Allow the nav bar to grow in height for two rows */
         padding-top: 5px; /* Reduce padding for stacked layout */
     }
 
     .nav-btn {
-        flex-basis: 48%; /* Each button takes up slightly less than 50% */
+        flex-basis: 45%; /* Each button takes up slightly less than 50% for padding/gap */
         margin: 5px 2px; /* Add vertical margin for spacing between rows */
         padding: 8px 5px; /* Adjust padding to save horizontal space */
         font-size: 0.8rem; /* Slightly smaller font to fit more text */
