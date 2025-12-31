@@ -582,3 +582,48 @@ window.onload = function() {
     appendToLog("PILGRIM OS v1.2 // SYSTEM ONLINE. TYPE 'HELP' FOR ASSISTANCE."); 
     commandInputEl.focus(); 
 };
+
+
+// --- GLITCH EFFECT CONTROLLER ---
+
+function startGlitchLoop() {
+    // 1. Define the minimum and maximum time for the random interval (in milliseconds)
+    const minTime = 2 * 60 * 1000; // 2 minutes
+    const maxTime = 5 * 60 * 1000; // 5 minutes
+    
+    // Calculate a random time between minTime and maxTime
+    const randomInterval = Math.floor(Math.random() * (maxTime - minTime + 1)) + minTime;
+
+    // Set the loop to trigger the glitch after the random interval
+    setTimeout(() => {
+        
+        // 2. TRIGGER THE GLITCH
+        document.body.classList.add('glitch-active');
+        
+        // --- Glitch Duration (The duration the screen is distorted) ---
+        const glitchDuration = 50; // 50 milliseconds
+        
+        setTimeout(() => {
+            // 3. START RECOVERY
+            // Remove the active class to stop the distortion
+            document.body.classList.remove('glitch-active');
+            
+            // Add the transition class to start the smooth snap-back (0.05s set in CSS)
+            document.body.classList.add('glitch-transition');
+            
+            // --- Recovery Duration (Must match the transition time set in CSS: 0.05s) ---
+            const recoveryDuration = 50; // 50 milliseconds
+            
+            setTimeout(() => {
+                // 4. RESET: Remove the transition class entirely
+                document.body.classList.remove('glitch-transition');
+                
+                // 5. RESTART THE LOOP
+                startGlitchLoop();
+                
+            }, recoveryDuration); // Matches the CSS transition time
+            
+        }, glitchDuration);
+        
+    }, randomInterval);
+}
