@@ -578,6 +578,9 @@ window.onload = function() {
 
     // NEW: Check and restrict navigation for mobile users
     restrictMobileNav();
+
+    // 💡 ADD THIS LINE TO START THE RANDOM GLITCH LOOP
+    startGlitchLoop();
     
     appendToLog("PILGRIM OS v1.2 // SYSTEM ONLINE. TYPE 'HELP' FOR ASSISTANCE."); 
     commandInputEl.focus(); 
@@ -588,8 +591,8 @@ window.onload = function() {
 
 function startGlitchLoop() {
     // 1. Define the minimum and maximum time for the random interval (in milliseconds)
-    const minTime = 2 * 60 * 1000; // 2 minutes
-    const maxTime = 5 * 60 * 1000; // 5 minutes
+    const minTime = 0.5 * 60 * 1000; // 0.5 minutes
+    const maxTime = 1 * 60 * 1000; // 1 minutes
     
     // Calculate a random time between minTime and maxTime
     const randomInterval = Math.floor(Math.random() * (maxTime - minTime + 1)) + minTime;
