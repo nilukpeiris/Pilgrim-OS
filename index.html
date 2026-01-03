@@ -5,16 +5,40 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Aetherium Dynamics // Pilgrim Ship Console OS v1.2</title>
     <link rel="stylesheet" href="style.css">
+
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
     <script defer src="script.js"></script>
+
 </head>
 <body>
 
     <div id="console-container">
         
-        <header>
+       <header>
             <h1>PILGRIM CLASS FREIGHTER // OPS</h1>
             <div class="clock"><span id="time">12:11:12 AM</span></div>
         </header>
+
+        <div id="login-screen">
+    		<div class="login-box">
+        <h2>PILGRIM-OS v1.2: ACCESS CONTROL</h2>
+        <p>PILOT CREDENTIALS REQUIRED TO PROCEED.</p>
+        
+        <label for="login-email">USER ID (EMAIL):</label>
+        <input type="email" id="login-email" placeholder="example@pilgrimos.com">
+        
+        <label for="login-password">ACCESS KEY (PASSWORD):</label>
+        <input type="password" id="login-password" placeholder="password">
+        
+        <button id="login-button" onclick="handleLoginScreen()">LOG IN</button>
+
+        <div id="login-message" class="error-message"></div>
+        
+        <p class="login-note">Note: If you do not have an account, the system will attempt to create one.</p>
+    </div>
+</div>
 
         <div id="viewport">
             
