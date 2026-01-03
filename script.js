@@ -1,3 +1,24 @@
+// --- FIREBASE INTEGRATION ---
+// Your web app's Firebase configuration
+const firebaseConfig = {
+    apiKey: "AIzaSyB7Cp6gRpXufgNRAHjMBWJXxJj4_HiAAyg",
+    authDomain: "pilgrim-os.firebaseapp.com",
+    projectId: "pilgrim-os",
+    storageBucket: "pilgrim-os.firebasestorage.app",
+    messagingSenderId: "937806159536",
+    appId: "1:937806159536:web:c4444958093609c2702575",
+    measurementId: "G-DD7KVYMMGY"
+};
+
+// Initialize Firebase App and get service references
+const app = firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth(); // Reference to Firebase Authentication
+const db = firebase.database(); // Reference to Firebase Realtime Database
+let currentUserId = null; // Variable to store the currently logged-in user ID
+let gameInitialized = false; // Flag to prevent re-initializing game loops
+// --- END FIREBASE INTEGRATION ---
+
+
 // --- DATA & CONFIGURATION ---
 
 // --- PASSWORDS & KEYS (SECRET - DO NOT DISPLAY) ---
@@ -22,7 +43,7 @@ let shipData = {
 // FULL CREW DATABASE 
 const PLAYER_PROFILES = {
      // NOTE: Image files are now expected in the same directory as script.js
-     1: {Name: "Aronus Zeebal", Expertise: "Ship Captain, Command", Photo: "aronus_zeebal.png", Record: "Fleet Captain C. P. Shepard, age 62, began their exemplary career by graduating at the top of their class from the Mars Naval Space Academy with a focus on Advanced Astrogation. Immediately following graduation, Shepard was recruited by the interplanetary conglomerate, ERIDANUS CORE, preferring the path of corporate logistics and deep-space resource acquisition over traditional military service. Shepard’s ascent through the ranks was swift and steady, a testament to their exceptional command presence and unmatched operational efficiency. Their sustained high performance led to the prestigious command of a Pilgrim-class vessel, a position they have held for 30 consecutive years. This extensive tenure is underscored by an immaculate service record, entirely free of mission failures or disciplinary actions. Shepard embodies the ideal ERIDANUS CORE officer: highly competent, strategically brilliant, and unwaveringly dedicated to the corporation's expansion across the Eridani sector.", Status: "Active"},
+     1: {Name: "Aronus Zeebal", Expertise: "Ship Captain, Command", Photo: "aronus_zeebal.png", Record: "Fleet Captain C. P. Shepard, age 62, began their exemplary career by graduating at the top of their class from the Mars Naval Space Academy with a focus on Advanced Astrogation. Immediately following graduation, Shepard was recruited by the interplanetary conglomerate, ERIDANUS CORE, preferring the path of corporate logistics and deep-space resource acquisition over traditional military service. Their sustained high performance led to the prestigious command of a Pilgrim-class vessel, a position they have held for 30 consecutive years. This extensive tenure is underscored by an immaculate service record, entirely free of mission failures or disciplinary actions. Shepard embodies the ideal ERIDANUS CORE officer: highly competent, strategically brilliant, and unwaveringly dedicated to the corporation's expansion across the Eridani sector.", Status: "Active"},
      2: {Name: "Robert Slim", Expertise: "First Officer, Astrogation", Photo: "robert_slim.png", Record: "Robert Slim is a distinguished graduate of the SolSys Command School and has served as First Officer on various Pilgrim-class freighters for the past seven years. Known for his exceptional navigational acumen and fastidious adherence to flight protocols, he is considered the model of next-generation corporate efficiency. His primary duties include maintaining all flight logs, validating course trajectories, and serving as Captain Zeebal’s direct operational superior. This mission is crucial for his career advancement, as he is formally positioned as the Captain’s successor upon Zeebal’s scheduled retirement. Slim maintains zero-tolerance for operational anomalies and is committed to ensuring the Pilgrim completes its trajectory to the Eridani sector with maximum efficiency, protecting the integrity of the official mission logs at all costs.", Status: "Active"},
      3: {Name: "Kaatrin Rheema", Expertise: "Ship Engineer", Photo: "kaatrin_rheema.png", Record: "Kaatrin Rheema is the Chief Engine Systems Specialist and has been personally responsible for maintaining the hyperdrive and thermal dynamics of the Pilgrim-class for over five cycles. A technical savant with an engineering background in advanced fluid dynamics, her expertise is considered irreplaceable for this deep-space voyage. Her duties include managing all plasma conduit integrity, monitoring power regulation systems, and ensuring the absolute stability of the hyperdrive synchronization matrix. Rheema is noted for her technical brilliance and objective, results-oriented approach; her loyalty is directed exclusively toward the flawless function of the ship’s complex machinery. Any system failure is considered a professional affront, and she has full command authority over all technical personnel and resources necessary for rapid, on-site diagnostics and repair.", Status: "Active"},
      4: {Name: "Mathias Mendelsonne", Expertise: "Corp. Private Security, Asset Protection", Photo: "mathias_mendelsonne.png", Record: "Agent Mendelsonne is onboard the Pilgrim on a dual-mandate mission. He has twelve years of service in the Corporate Security Force military police, providing a highly disciplined and procedural focus on his duties, despite an early honorable discharge leading to immediate contract renewal with the CPS's Black Ops sector. His primary function is to ensure the secure transit of High-Value Detainee Prisoner and provide Tier-4 asset protection for the ship's engine core and navigation array, designated under Icarus Protocol Compliance. His extensive knowledge of ZDC infiltration tactics is critical for countering potential sabotage. Access to his full CSF and SAD records is strictly controlled by HR Key (Level 9) due to the classified nature of his past operations, and he is fully authorized to use lethal force in defense of corporate assets.", Status: "Active"},
@@ -54,8 +75,14 @@ let navUnlocked = false;
 let o2DynamicInterval; 
 let o2RecoveryStarted = false; 
 
-// --- NAVIGATION LOGIC (Remains the same) ---
+// --- NAVIGATION LOGIC ---
 function switchScreen(screenName) {
+    // NEW: Authentication check
+    if (!currentUserId && screenName !== 'dashboard') {
+        appendToLog("[AUTH] ACCESS DENIED. LOGIN REQUIRED TO ACCESS CONSOLES.");
+        return;
+    }
+    
     document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
     document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
 
@@ -120,20 +147,19 @@ async function glitchEffect(duration = 200) {
 }
 
 
-// --- COMMAND PROMPT LOGIC ---
+// --- MODIFIED COMMAND PROMPT LOGIC (Handles LOGOUT & Access Check) ---
 async function executeCommand() {
     
-    const input = commandInputEl.value.trim().toUpperCase();
+    const input = commandInputEl.value.trim(); 
     commandInputEl.value = '';
     
-    const parts = input.split(' ');
+    const parts = input.toUpperCase().split(' ');
     const command = parts[0];
     
     // --- CONDITIONAL GLITCH CHECK ---
     const glitchCommands = ['HELP', 'REBOOT', 'DIAGNOSTICS'];
     
     if (glitchCommands.includes(command)) {
-        // Wait for the visual effect to complete before proceeding
         await glitchEffect(150); 
     }
     // ------------------------------------
@@ -143,105 +169,292 @@ async function executeCommand() {
     }
 
     let response = "";
-    
     const code = parts[1]; 
 
-    switch (command) {
-        case 'HELP':
-            response = "// AVAILABLE COMMANDS:\n// HELP: Display this list.\n// STATUS: Display current ship systems report.\n// CLEAR: Clear the terminal output.\n// DIAGNOSTICS: Run full systems diagnostic.\n// NAVLOG: Display current navigation clues.\n// CREW: List active crew IDs.\n// O2 LEVEL: Detailed life support reading.\n// COMMS: Check communication link status.\n// REBOOT: Attempt system soft-reboot.\n// EXECUTE <code>: Initiates repair/jump protocols (See Engineering Manuals for repair codes).";
-            break;
-        case 'STATUS':
-            response = "// SYSTEM STATUS REPORT:\n" +
-                       `// HULL: ${shipData.hull.status}\n` +
-                       `// ENGINE: ${shipData.engine.status}\n` +
-                       `// O2 LEVEL: ${shipData.o2.level.toFixed(1)}%\n` +
-                       `// COMMS: ${shipData.comms.status}\n` +
-                       `// COORDINATES: ${shipData.coords.status}`;
-            break;
-        
-        // --- EXECUTE COMMAND LOGIC ---
-        case 'EXECUTE':
-             if (!code) {
-                 response = "// ERROR: EXECUTE COMMAND REQUIRES A CODE (e.g., [CODE] or JUMP).";
-             } else if (code === ENGINE_FIX_CODE) {
-                 await applyEngineFixLogic(); 
-                 return; 
-             } else if (code === HULL_FIX_CODE) {
-                 await applyHullFixLogic(); 
-                 return; 
-             } else if (code === 'JUMP') {
-                 response = "// ERROR: JUMP PROTOCOL MUST BE INITIATED VIA NAV CORE AND REQUIRES 4-DIGIT COORDINATE INPUT.";
-             } else {
-                 response = `// ERROR: UNKNOWN EXECUTE CODE '${code}'. ACCESS DENIED. CHECK MANUALS.`;
-             }
-             break;
-        
-        // --- INFORMATION & UTILITY COMMANDS (Retained) ---
-        case 'NAVLOG':
-            if (currentClueIndex === -1) {
-                response = "// NAV CORE LOGIC IS OFFLINE. NO CLUES ACQUIRED YET. TRY THE NAV CORE CONSOLE.";
-            } else {
-                response = "// NAVIGATION DEFRAG CLUES:\n// " + SECTOR_CLUES.slice(0, currentClueIndex + 1).join('\n// ');
-            }
-            break;
-        case 'CREW':
-            let crewList = "// ACTIVE ROSTER (ID: Name):\n";
-            for(let i=1; i<=12; i++) {
-                crewList += `// ID ${i.toString().padStart(2, '0')}: ${PLAYER_PROFILES[i].Name}\n`;
-            }
-            response = crewList;
-            break;
-        case 'O2': 
-        case 'O2 LEVEL':
-            const o2Rate = (shipData.engine.status.includes("ONLINE") && shipData.hull.status.includes("NOMINAL")) ? 
-                           "RECOVERING (+0.05%/s)" : 
-                           (shipData.engine.status.includes("FAILURE") && shipData.hull.status.includes("BREACH")) ? 
-                           "CRITICAL DECAY (-0.04%/s)" : 
-                           "WARNING DECAY (-0.02%/s)";
-            response = `// OXYGEN LEVEL: ${shipData.o2.level.toFixed(1)}%\n// CURRENT RATE: ${o2Rate}`;
-            break;
-        case 'COMMS':
-            if (shipData.comms.status.includes("ONLINE")) {
-                response = "// Active connection to Corporate Relay 49. Status: Normal. Bandwidth: 98.7%.\n// COMMS READY.";
-            } else {
-                response = "// COMMUNICATION ARRAY OFFLINE. NO SIGNAL DETECTED. CHECK ENGINEERING CONSOLE FOR POWER/RELAY STATUS.";
-            }
-            break;
-        case 'REBOOT':
-            response = "// Initiating system soft-reboot sequence...\n// Core OS online. Warning: Critical ship systems remain degraded. Check diagnostics.";
-            break;
-        case 'PULL': 
-        case 'PULL HULL DATA':
-             response = `// HULL INTEGRITY: ${shipData.hull.status}\n// LAST KNOWN BREACH: Fore-Section, Sector Gamma-14. Use 'EXECUTE [CODE]' to seal.`;
-             break;
-        case 'SECURITY':
-            response = "// SECURITY PROTOCOL ACTIVE. Tier 3 Access granted.\n// All operational attempts logged. Agent Mendelsonne notified of command input.";
-            break;
-        case 'DIAGNOSTICS':
-            response = "// SCANNING SHIP SYSTEMS...\n// NO IMMEDIATE THREATS DETECTED BEYOND KNOWN CRITICAL FAILURES. CHECK ENGINEERING CONSOLE.";
-            break;
-        case 'LOG': 
-             logEl.scrollTop = logEl.scrollHeight; 
-             response = "// SCROLL TO LATEST LOG ENTRY.";
-             break;
-        case 'TIME':
-             response = `// CURRENT OS TIME: ${new Date().toLocaleTimeString()}`;
-             break;
-        case 'CLEAR':
-            clearLog();
-            response = "// READY.";
-            break;
-        default:
-            response = `// ERROR: UNKNOWN COMMAND '${input}'. TYPE 'HELP' FOR ASSISTANCE.`;
-            break;
+    // --- NEW: LOGIN/LOGOUT HANDLERS ---
+    if (command === 'LOGIN') {
+        // *** MODIFIED: Direct user to the login screen ***
+        response = "// ERROR: COMMAND LINE LOGIN DISABLED. USE DEDICATED PILOT INTERFACE.";
     }
+    
+    if (command === 'LOGOUT') {
+        await logoutUser();
+        return; 
+    }
+    
+    // --- RESTRICT ALL OTHER COMMANDS IF NOT LOGGED IN ---
+    if (!currentUserId && command !== 'HELP' && command !== 'CLEAR' && command !== 'TIME') {
+        response = "// ERROR: ACCESS DENIED. PILOT CREDENTIALS REQUIRED. USE DEDICATED LOGIN INTERFACE.";
+    } else {
+        // --- EXECUTE COMMANDS (Only if logged in or allowed) ---
+        switch (command) {
+            case 'HELP':
+                // *** MODIFIED: Removed LOGIN command instructions ***
+                response = "// AVAILABLE COMMANDS:\n// LOGOUT: End System Session.\n// STATUS: Display current ship systems report.\n// CLEAR: Clear the terminal output.\n// DIAGNOSTICS: Run full systems diagnostic.\n// NAVLOG: Display current navigation clues.\n// CREW: List active crew IDs.\n// O2 LEVEL: Detailed life support reading.\n// COMMS: Check communication link status.\n// REBOOT: Attempt system soft-reboot.\n// EXECUTE <code>: Initiates repair/jump protocols (See Engineering Manuals for repair codes).";
+                break;
+            case 'STATUS':
+                response = "// SYSTEM STATUS REPORT:\n" +
+                           `// HULL: ${shipData.hull.status}\n` +
+                           `// ENGINE: ${shipData.engine.status}\n` +
+                           `// O2 LEVEL: ${shipData.o2.level.toFixed(1)}%\n` +
+                           `// COMMS: ${shipData.comms.status}\n` +
+                           `// COORDINATES: ${shipData.coords.status}`;
+                break;
+            
+            // --- EXECUTE COMMAND LOGIC ---
+            case 'EXECUTE':
+                 if (!code) {
+                     response = "// ERROR: EXECUTE COMMAND REQUIRES A CODE (e.g., [CODE] or JUMP).";
+                 } else if (code === ENGINE_FIX_CODE) {
+                     await applyEngineFixLogic(); 
+                     return; 
+                 } else if (code === HULL_FIX_CODE) {
+                     await applyHullFixLogic(); 
+                     return; 
+                 } else if (code === 'JUMP') {
+                     response = "// ERROR: JUMP PROTOCOL MUST BE INITIATED VIA NAV CORE AND REQUIRES 4-DIGIT COORDINATE INPUT.";
+                 } else {
+                     response = `// ERROR: UNKNOWN EXECUTE CODE '${code}'. ACCESS DENIED. CHECK MANUALS.`;
+                 }
+                 break;
+            
+            // --- INFORMATION & UTILITY COMMANDS (Retained) ---
+            case 'NAVLOG':
+                if (currentClueIndex === -1) {
+                    response = "// NAV CORE LOGIC IS OFFLINE. NO CLUES ACQUIRED YET. TRY THE NAV CORE CONSOLE.";
+                } else {
+                    response = "// NAVIGATION DEFRAG CLUES:\n// " + SECTOR_CLUES.slice(0, currentClueIndex + 1).join('\n// ');
+                }
+                break;
+            case 'CREW':
+                let crewList = "// ACTIVE ROSTER (ID: Name):\n";
+                for(let i=1; i<=12; i++) {
+                    crewList += `// ID ${i.toString().padStart(2, '0')}: ${PLAYER_PROFILES[i].Name}\n`;
+                }
+                response = crewList;
+                break;
+            case 'O2': 
+            case 'O2 LEVEL':
+                const o2Rate = (shipData.engine.status.includes("ONLINE") && shipData.hull.status.includes("NOMINAL")) ? 
+                               "RECOVERING (+0.05%/s)" : 
+                               (shipData.engine.status.includes("FAILURE") && shipData.hull.status.includes("BREACH")) ? 
+                               "CRITICAL DECAY (-0.04%/s)" : 
+                               "WARNING DECAY (-0.02%/s)";
+                response = `// OXYGEN LEVEL: ${shipData.o2.level.toFixed(1)}%\n// CURRENT RATE: ${o2Rate}`;
+                break;
+            case 'COMMS':
+                if (shipData.comms.status.includes("ONLINE")) {
+                    response = "// Active connection to Corporate Relay 49. Status: Normal. Bandwidth: 98.7%.\n// COMMS READY.";
+                } else {
+                    response = "// COMMUNICATION ARRAY OFFLINE. NO SIGNAL DETECTED. CHECK ENGINEERING CONSOLE FOR POWER/RELAY STATUS.";
+                }
+                break;
+            case 'REBOOT':
+                response = "// Initiating system soft-reboot sequence...\n// Core OS online. Warning: Critical ship systems remain degraded. Check diagnostics.";
+                break;
+            case 'PULL': 
+            case 'PULL HULL DATA':
+                 response = `// HULL INTEGRITY: ${shipData.hull.status}\n// LAST KNOWN BREACH: Fore-Section, Sector Gamma-14. Use 'EXECUTE [CODE]' to seal.`;
+                 break;
+            case 'SECURITY':
+                response = "// SECURITY PROTOCOL ACTIVE. Tier 3 Access granted.\n// All operational attempts logged. Agent Mendelsonne notified of command input.";
+                break;
+            case 'DIAGNOSTICS':
+                response = "// SCANNING SHIP SYSTEMS...\n// NO IMMEDIATE THREATS DETECTED BEYOND KNOWN CRITICAL FAILURES. CHECK ENGINEERING CONSOLE.";
+                break;
+            case 'LOG': 
+                 logEl.scrollTop = logEl.scrollHeight; 
+                 response = "// SCROLL TO LATEST LOG ENTRY.";
+                 break;
+            case 'TIME':
+                 response = `// CURRENT OS TIME: ${new Date().toLocaleTimeString()}`;
+                 break;
+            case 'CLEAR':
+                clearLog();
+                response = "// READY.";
+                break;
+            default:
+                if (response === "") {
+                    response = `// ERROR: UNKNOWN COMMAND '${input.toUpperCase()}'. TYPE 'HELP' FOR ASSISTANCE.`;
+                }
+                break;
+        }
+    }
+
 
     if (response) {
         appendToLog(response);
     }
 }
 
-// --- ASYNC REPAIR LOGIC FUNCTIONS (Image paths updated) ---
+
+// =====================================================================
+// === NEW & MODIFIED: FIREBASE AUTHENTICATION AND DATA LOGIC ===
+// =====================================================================
+
+/**
+ * Enables/Disables all navigation buttons and command input.
+ * @param {boolean} enabled - true to enable, false to disable.
+ */
+function setConsoleAccess(enabled) {
+    const navButtons = document.querySelectorAll('.nav-btn');
+    // Disable/Enable all buttons except for the 'Status' (Dashboard) button
+    navButtons.forEach((btn, index) => {
+        if (index > 0) { // Keep Dashboard active/visible
+            btn.disabled = !enabled;
+            btn.style.opacity = enabled ? 1.0 : 0.4;
+            btn.style.cursor = enabled ? 'pointer' : 'not-allowed';
+            btn.setAttribute('title', enabled ? 'Access Granted' : 'Access Restricted - Login Required');
+        }
+    });
+    // Command input remains enabled so the user can type LOGOUT/HELP
+    commandInputEl.disabled = false;
+}
+
+/**
+ * Loads game data from the Realtime Database once the user is authenticated.
+ * @param {string} userId - The unique ID of the current user.
+ */
+function loadInitialData(userId) {
+    const shipDataRef = db.ref('users/' + userId + '/shipData');
+
+    shipDataRef.once('value', (snapshot) => {
+        const dbData = snapshot.val();
+        if (dbData) {
+            // Overwrite local shipData with persistent data from Firebase
+            Object.assign(shipData, dbData);
+            appendToLog("[DATA] Ship status loaded from persistent log.");
+        } else {
+             // If no data exists, initialize it in the database with current local data
+             shipDataRef.set(shipData).then(() => {
+                 appendToLog("[DATA] New pilot data initialized in cloud log.");
+             });
+        }
+        
+        // Start game loops and UI updates only after data is loaded
+        startO2LogicLoop();
+        gameInitialized = true;
+        updateDashboard(); 
+
+    }, (error) => {
+        appendToLog(`[ERR] Database error: ${error.message}`);
+    });
+}
+
+/**
+ * Persists the current ship data to the Realtime Database.
+ */
+function saveShipData() {
+    if (currentUserId) {
+        db.ref('users/' + currentUserId + '/shipData').set(shipData)
+          .catch(error => appendToLog(`[ERR] Failed to save data: ${error.message}`));
+    }
+}
+
+/**
+ * Handles the login attempt from the dedicated login screen.
+ * It will try to log in, and if the user doesn't exist, it will create one.
+ */
+async function handleLoginScreen() {
+    const emailEl = document.getElementById('login-email');
+    const passwordEl = document.getElementById('login-password');
+    const messageEl = document.getElementById('login-message');
+
+    const email = emailEl.value.trim();
+    const password = passwordEl.value.trim();
+
+    messageEl.textContent = ''; // Clear previous messages
+
+    if (!email || !password) {
+        messageEl.textContent = 'User ID and Access Key are required.';
+        return;
+    }
+    
+    // Simple minimum password length check
+    if (password.length < 6) { 
+        messageEl.textContent = 'Password must be at least 6 characters.';
+        return;
+    }
+
+    try {
+        messageEl.textContent = 'ACCESSING CORP. DATABASE...';
+        
+        // 1. Try to sign in
+        await auth.signInWithEmailAndPassword(email, password);
+        
+        // If sign-in is successful, the auth listener handles the rest.
+        
+    } catch (error) {
+        if (error.code === 'auth/user-not-found') {
+            
+            // 2. If user not found, try to create a new user (account creation)
+            try {
+                messageEl.textContent = 'New Pilot Profile Detected. Initializing...';
+                await auth.createUserWithEmailAndPassword(email, password);
+                
+                // If creation is successful, the auth listener handles the rest.
+                
+            } catch (createError) {
+                // Handle creation errors (e.g., email already in use, bad format)
+                messageEl.textContent = `LOGIN ERROR: ${createError.message.replace('Firebase:', '').trim()}`;
+            }
+            
+        } else {
+            // Handle other errors (e.g., wrong password, network issues)
+            messageEl.textContent = `LOGIN ERROR: ${error.message.replace('Firebase:', '').trim()}`;
+        }
+    }
+}
+
+
+/**
+ * Sets up the Firebase Authentication listener. This is the new entry point.
+ */
+function setupAuthListener() {
+    const loginScreen = document.getElementById('login-screen');
+
+    auth.onAuthStateChanged((user) => {
+        if (user) {
+            // User is signed in. HIDE LOGIN SCREEN.
+            if(loginScreen) loginScreen.style.display = 'none';
+            currentUserId = user.uid;
+            appendToLog(`[AUTH] Welcome, Pilot ${user.email}. System access granted.`);
+            
+            setConsoleAccess(true); // Enable Nav buttons
+            
+            if (!gameInitialized) {
+                loadInitialData(user.uid); 
+                // Set the initial screen to dashboard (after hiding login)
+                switchScreen('dashboard'); 
+            }
+            
+        } else {
+            // User is signed out. SHOW LOGIN SCREEN.
+            if(loginScreen) loginScreen.style.display = 'flex';
+            currentUserId = null;
+            
+            setConsoleAccess(false); // Disable Nav buttons
+            
+            // Clear the terminal and prompt the user 
+            clearLog();
+            appendToLog("// PILGRIM OS v1.2: SYSTEM STANDBY.");
+            
+            const messageEl = document.getElementById('login-message');
+            if(messageEl) messageEl.textContent = 'Session ended. Access key required.';
+        }
+    });
+}
+
+async function logoutUser() {
+    try {
+        await auth.signOut();
+        // The auth.onAuthStateChanged listener will handle the logout state
+    } catch (error) {
+        appendToLog(`[AUTH] LOGOUT ERROR: ${error.message}`);
+    }
+}
+
+// --- ASYNC REPAIR LOGIC FUNCTIONS (UPDATED TO CALL SAVE) ---
 
 async function applyEngineFixLogic() {
     if (shipData.engine.status.includes("FAILURE")) {
@@ -255,11 +468,11 @@ async function applyEngineFixLogic() {
         
         const engineImage = document.getElementById('engineStatusImage');
         if (engineImage) {
-            // Path corrected
             engineImage.src = "shipenginesfixed.png"; 
             engineImage.style.borderColor = "var(--primary-color)"; 
         }
         appendToLog("[ENGINE] ARRAY ONLINE. STABILITY 99.8%.");
+        saveShipData(); // Save state
     } else {
         appendToLog("[ENGINE] STATUS IS NOMINAL. NO REPAIR NEEDED.");
     }
@@ -277,19 +490,18 @@ async function applyHullFixLogic() {
         
         const hullImage = document.getElementById('hullStatusImage');
         if (hullImage) {
-            // Path corrected
             hullImage.src = "shipimage2.png";
             hullImage.style.borderColor = "var(--primary-color)"; 
         }
         appendToLog("[HULL] BREACH SEALED. INTEGRITY 100%.");
+        saveShipData(); // Save state
     } else {
         appendToLog("[HULL] STATUS IS NOMINAL. NO REPAIR NEEDED.");
     }
     updateDashboard();
 }
 
-
-// --- O2, DASHBOARD, NAV, PERSONNEL LOGIC (Image paths updated) ---
+// --- O2, DASHBOARD, NAV, PERSONNEL LOGIC ---
 
 function startO2LogicLoop() {
     if (o2DynamicInterval) return;
@@ -306,6 +518,7 @@ function startO2LogicLoop() {
             if(!o2RecoveryStarted) { 
                 appendToLog("[SYS] O2 RECOVERY PROTOCOL STARTED."); 
                 o2RecoveryStarted = true; 
+                saveShipData(); // Save on state change
             }
         } else if (engineFixed || hullFixed) {
             change = -O2_DECAY_RATE_WARNING;
@@ -321,6 +534,7 @@ function startO2LogicLoop() {
             shipData.o2.level = 0;
             clearInterval(o2DynamicInterval);
             alert("CRITICAL FAILURE: LIFE SUPPORT OFFLINE.");
+            saveShipData(); // Save on game over
         }
 
         // Periodic warning
@@ -442,6 +656,8 @@ function displayCurrentClues() {
 }
 
 function sectorLogicGame() {
+    if(!currentUserId) return appendToLog("[AUTH] LOGIN REQUIRED TO USE NAV CORE."); // Auth check
+    
     const s2 = document.getElementById('sector2').value.toUpperCase().trim();
     const s6 = document.getElementById('sector6').value.toUpperCase().trim();
     const s10 = document.getElementById('sector10').value.toUpperCase().trim();
@@ -457,6 +673,7 @@ function sectorLogicGame() {
         document.getElementById('navFinalPanel').style.display = 'block';
         navUnlocked = true;
         shipData.coords.status = "READY FOR INPUT";
+        saveShipData(); // Save state
     } else {
         appendToLog("[NAV] VERIFICATION FAILED.");
         if (currentClueIndex < SECTOR_CLUES.length - 1) { 
@@ -469,6 +686,7 @@ function sectorLogicGame() {
 }
 
 function accessNav(coords) {
+    if(!currentUserId) return appendToLog("[AUTH] LOGIN REQUIRED TO INITIATE JUMP."); // Auth check
     if(!navUnlocked) return;
     
     if(shipData.engine.status.includes("FAILURE")) {
@@ -480,10 +698,12 @@ function accessNav(coords) {
         shipData.coords.status = "LOCKED: EPSILON ERIDANI";
         appendToLog("!!! JUMP COORDINATES LOCKED. MISSION ACCOMPLISHED. !!!");
         alert("MISSION ACCOMPLISHED: JUMP INITIATED TO ERIDANI");
+        saveShipData(); // Save state
     } else if (coords.trim() === EARTH_COORDS) {
          shipData.coords.status = "LOCKED: EARTH";
          appendToLog("!!! JUMP COORDINATES LOCKED. MISSION ACCOMPLISHED. !!!");
          alert("MISSION ACCOMPLISHED: JUMP INITIATED TO EARTH");
+         saveShipData(); // Save state
     } else {
         appendToLog("[ERR] INVALID COORDINATES.");
     }
@@ -501,23 +721,22 @@ function displayCrewList() {
 }
 
 function getPersonnelFile(idStr) {
+    if(!currentUserId) return appendToLog("[AUTH] LOGIN REQUIRED TO ACCESS PERSONNEL FILES."); // Auth check
+    
     const id = parseInt(idStr.trim());
     const display = document.getElementById('personnelFileDisplay');
     const photoEl = document.getElementById('personnelPhoto'); 
     
-    // Updated default image path to corp_logo.gif
     const DEFAULT_PHOTO_PATH = "corp_logo.gif";
     
     if(isNaN(id) || id < 1 || id > 12) {
         display.innerText = "// ERROR: INVALID ID";
-        // Corrected Path
         photoEl.src = DEFAULT_PHOTO_PATH; 
         return;
     }
 
     const p = PLAYER_PROFILES[id];
 
-    // Use the correct path as a fallback if p.Photo is missing or empty
     photoEl.src = p.Photo || DEFAULT_PHOTO_PATH; 
     
     let content = `ID: ${id}\nNAME: ${p.Name}\nSTATUS: ${p.Status}\nEXPERT: ${p.Expertise}\n`;
@@ -544,13 +763,9 @@ function isMobileDevice() {
 
 function restrictMobileNav() {
     if (isMobileDevice()) {
-        // Switch to the Personnel screen immediately
         switchScreen('personnel');
 
         const navButtons = document.querySelectorAll('.nav-btn');
-        // The buttons are: [0] Status, [1] Nav Core, [2] Personnel, [3] Engineering
-        
-        // Disable all buttons except Personnel (index 2)
         navButtons.forEach((button, index) => {
             if (index !== 2) { 
                 button.disabled = true;
@@ -558,7 +773,6 @@ function restrictMobileNav() {
                 button.style.cursor = 'not-allowed';
                 button.setAttribute('title', 'Access Restricted on Mobile Device');
             } else {
-                // Ensure Personnel button is functional and active
                 button.disabled = false;
                 button.classList.add('active');
             }
@@ -569,20 +783,22 @@ function restrictMobileNav() {
 }
 
 
-// --- INIT ---
+// =====================================================================
+// --- INIT (The Core Fix) ---
+// =====================================================================
 window.onload = function() {
-    startO2LogicLoop();
+    // 1. START the Authentication Listener FIRST.
+    setupAuthListener(); 
+
+    // 2. Run non-dynamic, non-looping initial UI updates
     displayCrewList();
     displaySectorScan();
     updateDashboard();
 
-    // NEW: Check and restrict navigation for mobile users
+    // 3. Run non-login-dependent features
     restrictMobileNav();
-
-    // 💡 ADD THIS LINE TO START THE RANDOM GLITCH LOOP
     startGlitchLoop();
     
-    appendToLog("PILGRIM OS v1.2 // SYSTEM ONLINE. TYPE 'HELP' FOR ASSISTANCE."); 
     commandInputEl.focus(); 
 };
 
