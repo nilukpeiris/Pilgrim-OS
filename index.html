@@ -26,8 +26,8 @@
         <h2>PILGRIM-OS v1.2: ACCESS CONTROL</h2>
         <p>PILOT CREDENTIALS REQUIRED TO PROCEED.</p>
         
-        <label for="login-email">USER ID (EMAIL):</label>
-        <input type="email" id="login-email" placeholder="example@pilgrimos.com">
+        <label for="login-username">USER ID (USERNAME):</label>
+        <input type="text" id="login-username" placeholder="your name">
         
         <label for="login-password">ACCESS KEY (PASSWORD):</label>
         <input type="password" id="login-password" placeholder="password">
@@ -186,17 +186,28 @@
                     </div>
                 </div>
             </div>
-            </div>
 
-        <nav id="nav-bar">
+            <div id="screen-comms" class="screen">
+                <h2>// COMMS ARRAY: SIGNAL INTERCEPT</h2>
+                <div class="main-terminal-area comms-area">
+                    <div class="log-output" id="comms-log">
+                        <p class="console-prompt">// PILGRIM-OS V1.2 COMMS INTERFACE ONLINE.</p>
+                        <p class="console-prompt">// INITIATE SCAN TO SEARCH FOR ACTIVE TRANSMISSIONS: <span style="color: var(--warning-color);">SCAN</span></p>
+                    </div>
+                    <div class="terminal-input-container">
+                        <span class="prompt-prefix">></span>
+                        <input type="text" id="comms-input" class="terminal-input" onkeydown="handleCommsInput(event)">
+                    </div>
+                </div>
+            </div>
+            </div> <nav id="nav-bar">
             <button class="nav-btn active" onclick="switchScreen('dashboard')">Status</button>
             <button class="nav-btn" onclick="switchScreen('nav')">NavCore</button>
             <button class="nav-btn" onclick="switchScreen('personnel')">Personnel</button>
+            <button class="nav-btn" onclick="switchScreen('comms')">Comms</button>
             <button class="nav-btn" onclick="switchScreen('engineering')">Engineering</button>
         </nav>
-    </div>
-    
-    <div id="vertical-scanline"></div>
+    </div> <div id="vertical-scanline"></div>
 
 </body>
 </html>
