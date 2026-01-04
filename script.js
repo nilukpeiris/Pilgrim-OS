@@ -39,13 +39,24 @@ let shipData = {
     power: { status: "STABLE (RESERVE)" },
     coords: { status: "NAV DATA CORRUPTED" }
 };
+// END NEW POWER DATA
+
+// NEW COMMS DATA
+const HIDDEN_TRANSMISSIONS = [
+    "TRANSMISSION 01: '...we lost contact with Pilgrim-class Freighter 74 days ago. Presume hostile takeover or system failure. Do not approach sector Xy-14.' - Source: ERIDANUS CORE",
+    "TRANSMISSION 02: 'The corporate board is worried about the Eridani acquisition. There are rumors of a third party interested in the resource veins. Trust no one outside your manifest.' - Source: CORPORATE WHISPER",
+    "TRANSMISSION 03: 'Rix here. My comms array is fried, but I managed to patch a signal. I saw him. The prisoner. She's not who they say she is. Look for the black box file.' - Source: PRIVATE LOG (CORRUPTED)"
+];
+let foundTransmissions = [];
+let commsLog; // Global reference for the comms log element
+// END NEW COMMS DATA
 
 // FULL CREW DATABASE 
 const PLAYER_PROFILES = {
      // NOTE: Image files are now expected in the same directory as script.js
      1: {Name: "Aronus Zeebal", Expertise: "Ship Captain, Command", Photo: "aronus_zeebal.png", Record: "Fleet Captain C. P. Shepard, age 62, began their exemplary career by graduating at the top of their class from the Mars Naval Space Academy with a focus on Advanced Astrogation. Immediately following graduation, Shepard was recruited by the interplanetary conglomerate, ERIDANUS CORE, preferring the path of corporate logistics and deep-space resource acquisition over traditional military service. Their sustained high performance led to the prestigious command of a Pilgrim-class vessel, a position they have held for 30 consecutive years. This extensive tenure is underscored by an immaculate service record, entirely free of mission failures or disciplinary actions. Shepard embodies the ideal ERIDANUS CORE officer: highly competent, strategically brilliant, and unwaveringly dedicated to the corporation's expansion across the Eridani sector.", Status: "Active"},
      2: {Name: "Robert Slim", Expertise: "First Officer, Astrogation", Photo: "robert_slim.png", Record: "Robert Slim is a distinguished graduate of the SolSys Command School and has served as First Officer on various Pilgrim-class freighters for the past seven years. Known for his exceptional navigational acumen and fastidious adherence to flight protocols, he is considered the model of next-generation corporate efficiency. His primary duties include maintaining all flight logs, validating course trajectories, and serving as Captain Zeebal’s direct operational superior. This mission is crucial for his career advancement, as he is formally positioned as the Captain’s successor upon Zeebal’s scheduled retirement. Slim maintains zero-tolerance for operational anomalies and is committed to ensuring the Pilgrim completes its trajectory to the Eridani sector with maximum efficiency, protecting the integrity of the official mission logs at all costs.", Status: "Active"},
-     3: {Name: "Kaatrin Rheema", Expertise: "Ship Engineer", Photo: "kaatrin_rheema.png", Record: "Kaatrin Rheema is the Chief Engine Systems Specialist and has been personally responsible for maintaining the hyperdrive and thermal dynamics of the Pilgrim-class for over five cycles. A technical savant with an engineering background in advanced fluid dynamics, her expertise is considered irreplaceable for this deep-space voyage. Her duties include managing all plasma conduit integrity, monitoring power regulation systems, and ensuring the absolute stability of the hyperdrive synchronization matrix. Rheema is noted for her technical brilliance and objective, results-oriented approach; her loyalty is directed exclusively toward the flawless function of the ship’s complex machinery. Any system failure is considered a professional affront, and she has full command authority over all technical personnel and resources necessary for rapid, on-site diagnostics and repair.", Status: "Active"},
+     3: {Name: "Kaatrin Rheema", Expertise: "Ship Engineer", Photo: "kaatrin_rheema.png", Record: "Kaatrin Rheema is the Chief Engine Systems Specialist and has been personally responsible for maintaining the hyperdrive and thermal dynamics of the Pilgrim’s class for over five cycles. A technical savant with an engineering background in advanced fluid dynamics, her expertise is considered irreplaceable for this deep-space voyage. Her duties include managing all plasma conduit integrity, monitoring power regulation systems, and ensuring the absolute stability of the hyperdrive synchronization matrix. Rheema is noted for her technical brilliance and objective, results-oriented approach; her loyalty is directed exclusively toward the flawless function of the ship’s complex machinery. Any system failure is considered a professional affront, and she has full command authority over all technical personnel and resources necessary for rapid, on-site diagnostics and repair.", Status: "Active"},
      4: {Name: "Mathias Mendelsonne", Expertise: "Corp. Private Security, Asset Protection", Photo: "mathias_mendelsonne.png", Record: "Agent Mendelsonne is onboard the Pilgrim on a dual-mandate mission. He has twelve years of service in the Corporate Security Force military police, providing a highly disciplined and procedural focus on his duties, despite an early honorable discharge leading to immediate contract renewal with the CPS's Black Ops sector. His primary function is to ensure the secure transit of High-Value Detainee Prisoner and provide Tier-4 asset protection for the ship's engine core and navigation array, designated under Icarus Protocol Compliance. His extensive knowledge of ZDC infiltration tactics is critical for countering potential sabotage. Access to his full CSF and SAD records is strictly controlled by HR Key (Level 9) due to the classified nature of his past operations, and he is fully authorized to use lethal force in defense of corporate assets.", Status: "Active"},
      5: {Name: "Sarooji Arunberg", Expertise: "Police Detective", Photo: "sarooji_arunberg.png", Record: "Detective Sarooji Arunberg is a Detective 1st Grade with the Orbital Police Division (OPD), specializing in complex financial and data crime compliance. Her presence on the Pilgrim is a matter of official mandate: she is assigned as the independent law enforcement auditor for the Eridanus Corporation's high-value resource acquisition mission. Arunberg’s duties are twofold: first, she is responsible for maintaining the security and integrity of the high-profile prisoner transfer involving white-collar criminal Elara Voss, working alongside Corporate Private Security to ensure no unauthorized interference occurs. Second, upon arrival at the Eridani sector, she is tasked with conducting a transparent, government-mandated audit of the newly acquired corporate assets and infrastructure, ensuring full compliance with interplanetary regulatory law and serving as an external check on corporate activities. She operates with full independent authority but is committed to supporting the Captain and crew in the execution of the mission parameters.", Status: "Active"},
      6: {Name: "Clark Stubel", Expertise: "External Compliance Auditor", Photo: "clark_stubel.png", Record: "Clark Stubel is traveling under the authority of the Coalition for Fair Resource Allocation, a non-profit organization dedicated to monitoring deep-space exploratory missions for ethical resource hoarding and regulatory compliance. His official function is to observe the Pilgrim's acquisition protocols and verify that the Eridanus Corporation adheres to all agreements established in the Sol-Eridani Treaty. His extensive knowledge of ZDC infiltration tactics is critical for countering potential sabotage. Access to his full CSF and SAD records is strictly controlled by HR Key (Level 9) due to the classified nature of his past operations, and he is fully authorized to use lethal force in defense of corporate assets.", Status: "Active"},
@@ -78,9 +89,17 @@ let o2RecoveryStarted = false;
 // --- NAVIGATION LOGIC ---
 function switchScreen(screenName) {
     // NEW: Authentication check
-    if (!currentUserId && screenName !== 'dashboard') {
+    if (!currentUserId && screenName !== 'dashboard' && screenName !== 'comms') { 
         appendToLog("[AUTH] ACCESS DENIED. LOGIN REQUIRED TO ACCESS CONSOLES.");
         return;
+    }
+    
+    // Check for mobile restriction
+    if (isMobileDevice() && currentUserId) {
+        if (screenName !== 'dashboard' && screenName !== 'personnel' && screenName !== 'comms') {
+            appendToLog(`[SECURITY] ACCESS DENIED: ${screenName.toUpperCase()} is restricted on mobile.`);
+            return;
+        }
     }
     
     document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
@@ -89,14 +108,22 @@ function switchScreen(screenName) {
     document.getElementById('screen-' + screenName).classList.add('active');
 
     const buttons = document.querySelectorAll('.nav-btn');
+    // NOTE: Order of buttons is Status, NavCore, Personnel, Comms, Engineering
     if(screenName === 'dashboard') buttons[0].classList.add('active');
     if(screenName === 'nav') buttons[1].classList.add('active');
     if(screenName === 'personnel') buttons[2].classList.add('active');
-    if(screenName === 'engineering') buttons[3].classList.add('active');
+    if(screenName === 'comms') buttons[3].classList.add('active'); 
+    if(screenName === 'engineering') buttons[4].classList.add('active'); 
     
-    // Auto-focus on command input when returning to dashboard
+    // Auto-focus on command input when returning to dashboard or Comms
     if (screenName === 'dashboard') {
         commandInputEl.focus();
+    }
+    if (screenName === 'comms') { // NEW FOCUS
+        document.getElementById('comms-input').focus();
+    }
+    if (screenName === 'engineering') {
+        // Since Power Transfer is gone, we don't need a custom input focus here
     }
 }
 
@@ -189,8 +216,8 @@ async function executeCommand() {
         // --- EXECUTE COMMANDS (Only if logged in or allowed) ---
         switch (command) {
             case 'HELP':
-                // *** MODIFIED: Removed LOGIN command instructions ***
-                response = "// AVAILABLE COMMANDS:\n// LOGOUT: End System Session.\n// STATUS: Display current ship systems report.\n// CLEAR: Clear the terminal output.\n// DIAGNOSTICS: Run full systems diagnostic.\n// NAVLOG: Display current navigation clues.\n// CREW: List active crew IDs.\n// O2 LEVEL: Detailed life support reading.\n// COMMS: Check communication link status.\n// REBOOT: Attempt system soft-reboot.\n// EXECUTE <code>: Initiates repair/jump protocols (See Engineering Manuals for repair codes).";
+                // *** REMOVED TRANSFER from HELP list ***
+                response = "// AVAILABLE COMMANDS:\n// LOGOUT: End System Session.\n// STATUS: Display current ship systems report.\n// CLEAR: Clear the terminal output.\n// DIAGNOSTICS: Run full systems diagnostic.\n// NAVLOG: Display current navigation clues.\n// CREW: List active crew IDs.\n// O2: Detailed life support reading.\n// COMMS: Check communication link status.\n// REBOOT: Attempt system soft-reboot.\n// SCAN: Run comms array signal sweep (See Comms tab).\n// EXECUTE <code>: Initiates repair/jump protocols (See Engineering Manuals for repair codes).";
                 break;
             case 'STATUS':
                 response = "// SYSTEM STATUS REPORT:\n" +
@@ -218,6 +245,8 @@ async function executeCommand() {
                  }
                  break;
             
+            // --- REMOVED: case 'TRANSFER': ---
+            
             // --- INFORMATION & UTILITY COMMANDS (Retained) ---
             case 'NAVLOG':
                 if (currentClueIndex === -1) {
@@ -244,10 +273,13 @@ async function executeCommand() {
                 break;
             case 'COMMS':
                 if (shipData.comms.status.includes("ONLINE")) {
-                    response = "// Active connection to Corporate Relay 49. Status: Normal. Bandwidth: 98.7%.\n// COMMS READY.";
+                    response = "// Active connection to Corporate Relay 49. Status: Normal. Bandwidth: 98.7%.\n// COMMS READY. Use 'SCAN' on the dedicated Comms terminal.";
                 } else {
                     response = "// COMMUNICATION ARRAY OFFLINE. NO SIGNAL DETECTED. CHECK ENGINEERING CONSOLE FOR POWER/RELAY STATUS.";
                 }
+                break;
+            case 'SCAN': // Directs user to the new tab
+                response = "// Use the dedicated Comms tab terminal to run the SCAN command.";
                 break;
             case 'REBOOT':
                 response = "// Initiating system soft-reboot sequence...\n// Core OS online. Warning: Critical ship systems remain degraded. Check diagnostics.";
@@ -289,26 +321,131 @@ async function executeCommand() {
 
 
 // =====================================================================
-// === NEW & MODIFIED: FIREBASE AUTHENTICATION AND DATA LOGIC ===
+// === REMOVED ENGINEERING (POWER) LOGIC FUNCTIONS ===
+// =====================================================================
+// The functions executePowerTransfer and handleEngCommand have been removed.
+
+// =====================================================================
+// === COMMS LOGIC (Retained) ===
 // =====================================================================
 
 /**
- * Enables/Disables all navigation buttons and command input.
+ * Handles input from the dedicated Comms terminal.
+ */
+function handleCommsInput(event) {
+    if (event.key === 'Enter') {
+        const inputElement = event.target;
+        const commandText = inputElement.value.trim().toUpperCase();
+        
+        // Ensure log element is available
+        if (!commsLog) {
+            inputElement.value = '';
+            return;
+        }
+
+        // 1. Append the command to the comms log
+        commsLog.innerHTML += `<p class="user-command">> ${inputElement.value}</p>`;
+
+        // 2. Execute the specific comms command
+        let response = executeCommsCommand(commandText);
+        
+        // 3. Append the response and clear the input
+        commsLog.innerHTML += `<p class="console-response">${response}</p>`;
+        inputElement.value = '';
+        commsLog.scrollTop = commsLog.scrollHeight; // Scroll to bottom
+    }
+}
+
+/**
+ * Logic for commands entered into the Comms terminal.
+ */
+function executeCommsCommand(command) {
+    if (!currentUserId) return "// ERROR: ACCESS DENIED. LOGIN REQUIRED TO OPERATE ARRAY.";
+    
+    const parts = command.split(' ');
+    const primaryCommand = parts[0];
+
+    switch (primaryCommand) {
+        case 'SCAN':
+            // The comms status is checked from the main dashboard data
+            if (shipData.comms.status === "OFFLINE") {
+                // Modified response to reflect removal of Power Transfer
+                return "// ERROR: COMMS ARRAY OFFLINE. AWAITING REPAIR OF ARRAY.";
+            }
+
+            const success = Math.random() < 0.4; // 40% chance of finding a transmission
+            if (success && HIDDEN_TRANSMISSIONS.length > foundTransmissions.length) {
+                // Find the next available transmission
+                const newTransmission = HIDDEN_TRANSMISSIONS[foundTransmissions.length];
+                foundTransmissions.push(newTransmission);
+                
+                // Add a notification to the main terminal too!
+                appendToLog(`[COMMS INTERCEPT] SIGNAL LOCKED. Transmission ${foundTransmissions.length} received on Comms tab.`);
+                
+                return `// SIGNAL FOUND. DOWNLOAD INITIATED...\n// TRANSMISSION ${foundTransmissions.length} RECEIVED.\n// ${newTransmission}`;
+                
+            } else if (foundTransmissions.length === HIDDEN_TRANSMISSIONS.length) {
+                return "// SCAN COMPLETE. ALL KNOWN TRANSMISSION LOGS DOWNLOADED. ARRAY STANDBY.";
+            } else {
+                return "// SCAN DETECTED INTERFERENCE. NO CLEAR SIGNAL ACQUIRED. TRY AGAIN.";
+            }
+
+        case 'CLEAR':
+            commsLog.innerHTML = '<p class="console-prompt">// COMMS LOG CLEARED.</p>';
+            return "";
+
+        default:
+            return "// ERROR: UNRECOGNIZED COMMS COMMAND. ACCEPTED COMMANDS: SCAN, CLEAR.";
+    }
+}
+
+// =====================================================================
+// === AUTHENTICATION AND DATA LOGIC (Modified) ===
+// =====================================================================
+
+/**
+ * Enables/Disables all navigation buttons and command input, applying mobile restrictions.
  * @param {boolean} enabled - true to enable, false to disable.
  */
 function setConsoleAccess(enabled) {
     const navButtons = document.querySelectorAll('.nav-btn');
-    // Disable/Enable all buttons except for the 'Status' (Dashboard) button
+    const isMobile = isMobileDevice(); 
+    
+    // Indices: 0: Status, 1: NavCore, 2: Personnel, 3: Comms, 4: Engineering
+    const allowedMobileIndices = [0, 2, 3]; // Status, Personnel, Comms
+    
     navButtons.forEach((btn, index) => {
-        if (index > 0) { // Keep Dashboard active/visible
-            btn.disabled = !enabled;
-            btn.style.opacity = enabled ? 1.0 : 0.4;
-            btn.style.cursor = enabled ? 'pointer' : 'not-allowed';
-            btn.setAttribute('title', enabled ? 'Access Granted' : 'Access Restricted - Login Required');
+        let shouldBeEnabled = enabled;
+
+        if (isMobile && enabled) {
+            // If logged in AND mobile: only allow Status, Personnel, Comms
+            if (!allowedMobileIndices.includes(index)) { 
+                shouldBeEnabled = false; 
+            }
+        } else if (!enabled) {
+            // Not logged in: only keep Dashboard (index 0) visually active/default
+             if (index > 0) {
+                 shouldBeEnabled = false;
+             } 
+        }
+        
+        btn.disabled = !shouldBeEnabled;
+        btn.style.opacity = shouldBeEnabled ? 1.0 : 0.4;
+        btn.style.cursor = shouldBeEnabled ? 'pointer' : 'not-allowed';
+        // Update the title attribute based on the restriction
+        if (isMobile && enabled && !shouldBeEnabled) {
+            btn.setAttribute('title', 'Access Restricted - Mobile Device');
+        } else {
+            btn.setAttribute('title', shouldBeEnabled ? 'Access Granted' : 'Access Restricted - Login Required');
         }
     });
+    
     // Command input remains enabled so the user can type LOGOUT/HELP
     commandInputEl.disabled = false;
+    
+    if (isMobile && enabled) {
+        appendToLog("[SECURITY] MOBILE ACCESS ACTIVE. CONSOLES RESTRICTED TO STATUS, PERSONNEL, & COMMS.");
+    }
 }
 
 /**
@@ -319,16 +456,13 @@ function loadInitialData(userId) {
     const shipDataRef = db.ref('users/' + userId + '/shipData');
 
     shipDataRef.once('value', (snapshot) => {
-        const dbData = snapshot.val();
-        if (dbData) {
-            // Overwrite local shipData with persistent data from Firebase
-            Object.assign(shipData, dbData);
+        const dbShipData = snapshot.val();
+        if (dbShipData) {
+            Object.assign(shipData, dbShipData);
             appendToLog("[DATA] Ship status loaded from persistent log.");
         } else {
-             // If no data exists, initialize it in the database with current local data
-             shipDataRef.set(shipData).then(() => {
-                 appendToLog("[DATA] New pilot data initialized in cloud log.");
-             });
+             shipDataRef.set(shipData);
+             appendToLog("[DATA] New pilot ship data initialized in cloud log.");
         }
         
         // Start game loops and UI updates only after data is loaded
@@ -346,8 +480,9 @@ function loadInitialData(userId) {
  */
 function saveShipData() {
     if (currentUserId) {
+        // Removed powerState save
         db.ref('users/' + currentUserId + '/shipData').set(shipData)
-          .catch(error => appendToLog(`[ERR] Failed to save data: ${error.message}`));
+          .catch(error => appendToLog(`[ERR] Failed to save ship data: ${error.message}`));
     }
 }
 
@@ -356,25 +491,29 @@ function saveShipData() {
  * It will try to log in, and if the user doesn't exist, it will create one.
  */
 async function handleLoginScreen() {
-    const emailEl = document.getElementById('login-email');
+    const usernameEl = document.getElementById('login-username'); 
     const passwordEl = document.getElementById('login-password');
     const messageEl = document.getElementById('login-message');
 
-    const email = emailEl.value.trim();
+    const username = usernameEl.value.trim();
     const password = passwordEl.value.trim();
 
     messageEl.textContent = ''; // Clear previous messages
 
-    if (!email || !password) {
-        messageEl.textContent = 'User ID and Access Key are required.';
+    if (!username || !password) {
+        messageEl.textContent = 'Pilot ID and Access Key are required.';
         return;
     }
     
     // Simple minimum password length check
     if (password.length < 6) { 
-        messageEl.textContent = 'Password must be at least 6 characters.';
+        messageEl.textContent = 'Access Key must be at least 6 characters.';
         return;
     }
+
+    // --- FAUX EMAIL LOGIC ---
+    const email = `${username}@pilgrim.ship`; 
+    // ------------------------
 
     try {
         messageEl.textContent = 'ACCESSING CORP. DATABASE...';
@@ -412,28 +551,33 @@ async function handleLoginScreen() {
  */
 function setupAuthListener() {
     const loginScreen = document.getElementById('login-screen');
+    const consoleContainer = document.getElementById('console-container');
 
     auth.onAuthStateChanged((user) => {
         if (user) {
             // User is signed in. HIDE LOGIN SCREEN.
             if(loginScreen) loginScreen.style.display = 'none';
+            if(consoleContainer) consoleContainer.classList.remove('locked');
             currentUserId = user.uid;
-            appendToLog(`[AUTH] Welcome, Pilot ${user.email}. System access granted.`);
+            appendToLog(`[AUTH] Welcome, Pilot ${user.email.split('@')[0]}. System access granted.`);
             
-            setConsoleAccess(true); // Enable Nav buttons
+            setConsoleAccess(true); // Enable Nav buttons (with mobile restrictions)
             
             if (!gameInitialized) {
                 loadInitialData(user.uid); 
-                // Set the initial screen to dashboard (after hiding login)
-                switchScreen('dashboard'); 
+                
+                // Set the initial screen based on device type (NEW LOGIC)
+                const startScreen = isMobileDevice() ? 'personnel' : 'dashboard'; 
+                switchScreen(startScreen); 
             }
             
         } else {
             // User is signed out. SHOW LOGIN SCREEN.
             if(loginScreen) loginScreen.style.display = 'flex';
+            if(consoleContainer) consoleContainer.classList.add('locked');
             currentUserId = null;
             
-            setConsoleAccess(false); // Disable Nav buttons
+            setConsoleAccess(false); // Disable Nav buttons (except dashboard for help)
             
             // Clear the terminal and prompt the user 
             clearLog();
@@ -595,7 +739,7 @@ function updateDashboard() {
     // --- COORDS ---
     const coordCard = document.getElementById('coordIconCard');
     coordCard.classList.remove('warning', 'nominal');
-    if (shipData.coords.status.includes("CORRUPTED")) {
+    if (shipData.coords.status.includes("CORRUPTED")) { 
         coordCard.classList.add('warning');
         document.getElementById('coordIconCard').querySelector('.icon-symbol').innerHTML = '&#9734;'; 
     } else {
@@ -619,6 +763,8 @@ function updateDashboard() {
     if(shipData.o2.level < 20) gauge.style.background = "red";
     else if(shipData.o2.level < 50) gauge.style.background = "orange";
     else gauge.style.background = "var(--primary-color)";
+    
+    // --- REMOVED: NEW ENGINEERING POWER DISPLAY --- 
 }
 
 function displaySectorScan() {
@@ -761,32 +907,14 @@ function isMobileDevice() {
            /Mobi|Android/i.test(navigator.userAgent);
 }
 
-function restrictMobileNav() {
-    if (isMobileDevice()) {
-        switchScreen('personnel');
-
-        const navButtons = document.querySelectorAll('.nav-btn');
-        navButtons.forEach((button, index) => {
-            if (index !== 2) { 
-                button.disabled = true;
-                button.style.opacity = 0.4;
-                button.style.cursor = 'not-allowed';
-                button.setAttribute('title', 'Access Restricted on Mobile Device');
-            } else {
-                button.disabled = false;
-                button.classList.add('active');
-            }
-        });
-
-        appendToLog("[SECURITY] MOBILE ACCESS DETECTED. ALL CONSOLES EXCEPT PERSONNEL ARE RESTRICTED.");
-    }
-}
-
 
 // =====================================================================
 // --- INIT (The Core Fix) ---
 // =====================================================================
 window.onload = function() {
+    // CORRECTED: Initialize the global commsLog variable here
+    commsLog = document.getElementById('comms-log');
+
     // 1. START the Authentication Listener FIRST.
     setupAuthListener(); 
 
@@ -796,7 +924,6 @@ window.onload = function() {
     updateDashboard();
 
     // 3. Run non-login-dependent features
-    restrictMobileNav();
     startGlitchLoop();
     
     commandInputEl.focus(); 
