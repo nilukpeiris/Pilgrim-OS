@@ -755,7 +755,7 @@ body.glitch-transition {
     color: var(--primary-color);
 }
 
-.login-box input[type="email"], 
+.login-box input[type="text"], 
 .login-box input[type="password"] {
     width: 100%;
     padding: 10px;
@@ -765,6 +765,7 @@ body.glitch-transition {
     color: var(--primary-color);
     font-family: 'Space Mono', monospace;
     box-sizing: border-box;
+    margin-left: 0;
 }
 
 #login-button {
@@ -793,4 +794,27 @@ body.glitch-transition {
     color: var(--alert-color);
     margin-top: 10px;
     font-size: 0.8rem;
+}
+
+/* --- NEW COMMS SCREEN STYLES --- */
+.comms-area {
+    /* Set specific height for the comms terminal if needed, or rely on .main-terminal-area */
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Style for command entries in the new comms log */
+.comms-area .user-command {
+    color: var(--warning-color); /* Use a different color for user input in this log */
+    margin: 0;
+    padding: 0;
+}
+
+/* Style for system response in the new comms log */
+.comms-area .console-response {
+    color: var(--primary-color);
+    margin: 0 0 5px 0;
+    padding: 0;
+    white-space: pre-wrap; /* Ensures the multiline transmission text is preserved */
 }
