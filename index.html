@@ -187,19 +187,27 @@
                 </div>
             </div>
 
-            <div id="screen-comms" class="screen">
-                <h2>// COMMS ARRAY: SIGNAL INTERCEPT</h2>
-                <div class="main-terminal-area comms-area">
-                    <div class="log-output" id="comms-log">
-                        <p class="console-prompt">// PILGRIM-OS V1.2 COMMS INTERFACE ONLINE.</p>
-                        <p class="console-prompt">// INITIATE SCAN TO SEARCH FOR ACTIVE TRANSMISSIONS: <span style="color: var(--warning-color);">SCAN</span></p>
-                    </div>
-                    <div class="terminal-input-container">
-                        <span class="prompt-prefix">></span>
-                        <input type="text" id="comms-input" class="terminal-input" onkeydown="handleCommsInput(event)">
-                    </div>
-                </div>
+<div id="screen-comms" class="screen full-height-flex comms-grid">
+    <h2>// COMMS ARRAY: SIGNAL INTERCEPT</h2>
+    
+    <div id="commsLeftPanel" class="status-card comms-panel">
+        <h3>// CURRENT PERSONNEL</h3>
+        <p style="font-size: 0.85rem;">[0.25 screen width box]</p>
+        <p style="font-size: 0.85rem;">Placeholder for future signal analysis, decryption keys, or status indicators.</p>
+    </div>
+    
+    <div id="commsTerminalWrapper" class="comms-panel status-card">
+        <h3>// COMMS CONSOLE</h3> 
+        
+        <div id="commsLogContainer" class="log-container"> 
+            <pre id="commsLog">// COMMS CONSOLE ONLINE. TYPE 'HELP' FOR COMMANDS.</pre>
+            <div class="command-prompt">
+                <span>></span>
+                <input type="text" id="commsInput" placeholder="ENTER COMMAND (e.g., SCAN, HELP)..." onkeydown="if(event.key === 'Enter') executeCommsCommand()">
             </div>
+        </div>
+    </div>
+</div>
             </div> <nav id="nav-bar">
             <button class="nav-btn active" onclick="switchScreen('dashboard')">Status</button>
             <button class="nav-btn" onclick="switchScreen('nav')">NavCore</button>

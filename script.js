@@ -41,15 +41,6 @@ let shipData = {
 };
 // END NEW POWER DATA
 
-// NEW COMMS DATA
-const HIDDEN_TRANSMISSIONS = [
-    "TRANSMISSION 01: '...we lost contact with Pilgrim-class Freighter 74 days ago. Presume hostile takeover or system failure. Do not approach sector Xy-14.' - Source: ERIDANUS CORE",
-    "TRANSMISSION 02: 'The corporate board is worried about the Eridani acquisition. There are rumors of a third party interested in the resource veins. Trust no one outside your manifest.' - Source: CORPORATE WHISPER",
-    "TRANSMISSION 03: 'Rix here. My comms array is fried, but I managed to patch a signal. I saw him. The prisoner. She's not who they say she is. Look for the black box file.' - Source: PRIVATE LOG (CORRUPTED)"
-];
-let foundTransmissions = [];
-let commsLog; // Global reference for the comms log element
-// END NEW COMMS DATA
 
 // FULL CREW DATABASE 
 const PLAYER_PROFILES = {
@@ -209,7 +200,7 @@ async function executeCommand() {
     
     // --- RESTRICT ALL OTHER COMMANDS IF NOT LOGGED IN ---
     if (!currentUserId && command !== 'HELP' && command !== 'CLEAR' && command !== 'TIME') {
-        response = "// ERROR: ACCESS DENIED. PILOT CREDENTIALS REQUIRED. USE DEDICATED LOGIN INTERFACE.";
+        response = "// ERROR: ACCESS DENIED. CREW/PASSENGER CREDENTIALS REQUIRED. USE DEDICATED LOGIN INTERFACE.";
     } else {
         // --- EXECUTE COMMANDS (Only if logged in or allowed) ---
         switch (command) {
@@ -315,85 +306,6 @@ async function executeCommand() {
     }
 }
 
-
-// =====================================================================
-// === REMOVED ENGINEERING (POWER) LOGIC FUNCTIONS ===
-// =====================================================================
-// The functions executePowerTransfer and handleEngCommand have been removed.
-
-// =====================================================================
-// === COMMS LOGIC (Retained) ===
-// =====================================================================
-
-/**
- * Handles input from the dedicated Comms terminal.
- */
-function handleCommsInput(event) {
-    if (event.key === 'Enter') {
-        const inputElement = event.target;
-        const commandText = inputElement.value.trim().toUpperCase();
-        
-        // Ensure log element is available
-        if (!commsLog) {
-            inputElement.value = '';
-            return;
-        }
-
-        // 1. Append the command to the comms log
-        commsLog.innerHTML += `<p class="user-command">> ${inputElement.value}</p>`;
-
-        // 2. Execute the specific comms command
-        let response = executeCommsCommand(commandText);
-        
-        // 3. Append the response and clear the input
-        commsLog.innerHTML += `<p class="console-response">${response}</p>`;
-        inputElement.value = '';
-        commsLog.scrollTop = commsLog.scrollHeight; // Scroll to bottom
-    }
-}
-
-/**
- * Logic for commands entered into the Comms terminal.
- */
-function executeCommsCommand(command) {
-    if (!currentUserId) return "// ERROR: ACCESS DENIED. LOGIN REQUIRED TO OPERATE ARRAY.";
-    
-    const parts = command.split(' ');
-    const primaryCommand = parts[0];
-
-    switch (primaryCommand) {
-        case 'SCAN':
-            // The comms status is checked from the main dashboard data
-            if (shipData.comms.status === "OFFLINE") {
-                // Modified response to reflect removal of Power Transfer
-                return "// ERROR: COMMS ARRAY OFFLINE. AWAITING REPAIR OF ARRAY.";
-            }
-
-            const success = Math.random() < 0.4; // 40% chance of finding a transmission
-            if (success && HIDDEN_TRANSMISSIONS.length > foundTransmissions.length) {
-                // Find the next available transmission
-                const newTransmission = HIDDEN_TRANSMISSIONS[foundTransmissions.length];
-                foundTransmissions.push(newTransmission);
-                
-                // Add a notification to the main terminal too!
-                appendToLog(`[COMMS INTERCEPT] SIGNAL LOCKED. Transmission ${foundTransmissions.length} received on Comms tab.`);
-                
-                return `// SIGNAL FOUND. DOWNLOAD INITIATED...\n// TRANSMISSION ${foundTransmissions.length} RECEIVED.\n// ${newTransmission}`;
-                
-            } else if (foundTransmissions.length === HIDDEN_TRANSMISSIONS.length) {
-                return "// SCAN COMPLETE. ALL KNOWN TRANSMISSION LOGS DOWNLOADED. ARRAY STANDBY.";
-            } else {
-                return "// SCAN DETECTED INTERFERENCE. NO CLEAR SIGNAL ACQUIRED. TRY AGAIN.";
-            }
-
-        case 'CLEAR':
-            commsLog.innerHTML = '<p class="console-prompt">// COMMS LOG CLEARED.</p>';
-            return "";
-
-        default:
-            return "// ERROR: UNRECOGNIZED COMMS COMMAND. ACCEPTED COMMANDS: SCAN, CLEAR.";
-    }
-}
 
 // =====================================================================
 // === AUTHENTICATION AND DATA LOGIC (Modified) ===

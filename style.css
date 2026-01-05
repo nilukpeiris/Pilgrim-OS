@@ -83,6 +83,15 @@ header h1 {
     pointer-events: all;
 }
 
+/* NEW CLASS: For screens that need their content (like the log) to fill all available space */
+.full-height-flex {
+    display: flex; /* Makes it a flex container */
+    flex-direction: column; /* Stacks children vertically */
+    height: 100%; /* Ensures it uses the full height of its parent (#viewport) */
+    box-sizing: border-box; 
+    gap: 10px; /* Provides separation between H2 and the log box */
+}
+
 .screen h2 {
     border-bottom: 1px solid rgba(0, 240, 255, 0.5);
     padding-bottom: 5px;
@@ -218,8 +227,9 @@ input[type="text"]:focus {
     transition: width 0.5s ease-out, background-color 0.5s ease-out;
 }
 
-/* Log Container and Prompt */
-#log-container {
+/* Log Container and Prompt (FIXED: Added #commsLogContainer for full height) */
+#log-container, 
+#commsLogContainer { /* ADDED #commsLogContainer */
     /* MODIFIED: Take all remaining vertical space */
     flex-grow: 1; 
     
@@ -229,22 +239,30 @@ input[type="text"]:focus {
     border: 1px solid var(--primary-color);
     /* Pushes content to the bottom, ensuring the input prompt is visible */
     justify-content: flex-end; 
+    min-height: 0; /* Critical for Flexbox in Chrome/Firefox */
 }
 
-#terminalLog {
+#terminalLog,
+#commsLog { /* ADDED #commsLog and updated layout properties */
     /* FIX: The most reliable Flexbox scrolling fix: flex: 1 1 0; */
     flex: 1 1 0;
     
-    /* FIX: Ensure padding/border is included in the element's height calculation */
+    /* REVERTED FONT SIZE */
+    font-size: 0.85rem; 
+    
+    /* TIGHTENED LINE HEIGHT: Keeps text packed to avoid the "scrunched" look */
+    line-height: 1.1; 
+    
+    /* TIGHTENED PADDING: Maximizes space */
+    padding: 8px; 
+    margin: 0;
+    
+    /* Ensure padding/border is included in the element's height calculation */
     box-sizing: border-box; 
     
     overflow-y: scroll;
-    padding: 10px;
-    margin: 0;
     white-space: pre-wrap;
     word-break: break-word;
-    font-size: 0.85rem;
-    line-height: 1.2;
     min-height: 0; 
 }
 
@@ -260,13 +278,15 @@ input[type="text"]:focus {
     margin-right: 5px;
 }
 
-#commandInput {
+#commandInput,
+#commsInput { /* ADDED #commsInput to inherit the full-width input style */
     flex-grow: 1;
     border: none;
     background-color: transparent;
     padding: 0;
 }
-#commandInput:focus {
+#commandInput:focus,
+#commsInput:focus { /* ADDED #commsInput:focus to inherit the focus style */
     box-shadow: none;
 }
 
@@ -655,6 +675,7 @@ body.glitch-transition {
     color: var(--primary-color);
     font-family: 'Space Mono', monospace;
     box-sizing: border-box;
+    margin-left: 0;
 }
 
 #login-button {
@@ -797,11 +818,51 @@ body.glitch-transition {
 }
 
 /* --- NEW COMMS SCREEN STYLES --- */
-.comms-area {
-    /* Set specific height for the comms terminal if needed, or rely on .main-terminal-area */
-    height: 100%;
+
+/* NEW COMMS GRID LAYOUT */
+.comms-grid {
+    /* This overrides the .full-height-flex display and sets up a grid */
+    display: grid; 
+    /* Define 2 columns: 0.25 (25%) and 0.75 (75%) */
+    grid-template-columns: 0.25fr 0.75fr;
+    
+    /* Define 2 rows: H2 takes auto height, grid content takes the rest */
+    grid-template-rows: auto 1fr; 
+    
+    /* Assign areas for layout */
+    grid-template-areas: 
+        "header header"
+        "left right";
+    
+    gap: 20px;
+}
+
+/* Ensure the header spans all columns */
+.comms-grid h2 {
+    grid-area: header;
+    margin-bottom: 0; /* Remove margin so gap controls spacing */
+}
+
+/* Assign areas to the new panels */
+#commsLeftPanel {
+    grid-area: left;
+    height: 100%; /* Ensure left panel fills the vertical space */
     display: flex;
     flex-direction: column;
+    /* FIX: Remove the default margin-bottom from .status-card so the box stretches to 100% of the grid row height */
+    margin-bottom: 0; 
+}
+
+#commsTerminalWrapper {
+    grid-area: right;
+    height: 100%; /* Ensure wrapper fills vertical space */
+    display: flex;
+    flex-direction: column;
+}
+
+/* General styles for the comms panels (optional, but good practice) */
+.comms-panel {
+    min-height: 0; /* Ensures the flex/grid items can shrink */
 }
 
 /* Style for command entries in the new comms log */
