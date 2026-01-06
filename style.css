@@ -599,6 +599,22 @@ input[type="text"]:focus {
         padding: 8px 5px; /* Adjust padding to save horizontal space */
         font-size: 0.8rem; /* Slightly smaller font to fit more text */
     }
+
+    /* NEW: Comms screen stacking for mobile */
+    .comms-grid {
+        /* Override desktop 2-column grid */
+        grid-template-columns: 1fr; 
+        
+        /* Set new row layout: Header (auto), Left Panel (auto height), Right Panel (fills rest) */
+        grid-template-rows: auto auto 1fr; 
+        
+        /* Re-define areas to stack vertically: Header -> Left Panel -> Right Terminal */
+        grid-template-areas: 
+            "header"
+            "left"
+            "right";
+        gap: 15px; /* Slightly reduce gap for mobile */
+    }
 }
 
 /* --- NEW: GLITCH/SEIZURE EFFECT STYLES (REVISED) --- */
