@@ -12,7 +12,6 @@ const firebaseConfig = {
 
 // Initialize Firebase App and get service references
 const app = firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth(); // Reference to Firebase Authentication
 const db = firebase.database(); // Reference to Firebase Realtime Database
 let currentUserId = null; // Variable to store the currently logged-in user ID
 let gameInitialized = false; // Flag to prevent re-initializing game loops
@@ -189,7 +188,7 @@ async function executeCommand() {
 
     // --- NEW: LOGIN/LOGOUT HANDLERS ---
     if (command === 'LOGIN') {
-        // *** MODIFIED: Direct user to the login screen ***
+        // *** MODIFIED: Keep the error message but remove the internal instruction to use a dedicated interface ***
         response = "// ERROR: COMMAND LINE LOGIN DISABLED. USE DEDICATED PILOT INTERFACE.";
     }
     
@@ -360,7 +359,7 @@ function setConsoleAccess(enabled) {
 
 /**
  * Loads game data from the Realtime Database once the user is authenticated.
- * @param {string} userId - The unique ID of the current user.
+ * @param {string} userId - The unique ID (now the username) of the current user.
  */
 function loadInitialData(userId) {
     const shipDataRef = db.ref('users/' + userId + '/shipData');
@@ -397,8 +396,53 @@ function saveShipData() {
 }
 
 /**
- * Handles the login attempt from the dedicated login screen.
- * It will try to log in, and if the user doesn't exist, it will create one.
+ * Updates the UI and internal state based on the current user ID.
+ * This replaces the functionality of auth.onAuthStateChanged.
+ * @param {string|null} userId - The current user's ID (username), or null if logged out.
+ */
+function updateAuthState(userId) {
+    const loginScreen = document.getElementById('login-screen');
+    const consoleContainer = document.getElementById('console-container');
+    const messageEl = document.getElementById('login-message');
+
+    if (userId) {
+        // User is signed in. HIDE LOGIN SCREEN.
+        if(loginScreen) loginScreen.style.display = 'none';
+        if(consoleContainer) consoleContainer.classList.remove('locked');
+        currentUserId = userId;
+        appendToLog(`[AUTH] Welcome, Pilot ${userId}. System access granted.`);
+        
+        setConsoleAccess(true); // Enable Nav buttons (with mobile restrictions)
+        
+        if (!gameInitialized) {
+            loadInitialData(userId); 
+            
+            // Set the initial screen based on device type (NEW LOGIC)
+            const startScreen = isMobileDevice() ? 'personnel' : 'dashboard'; 
+            switchScreen(startScreen); 
+        }
+        
+    } else {
+        // User is signed out. SHOW LOGIN SCREEN.
+        if(loginScreen) loginScreen.style.display = 'flex';
+        if(consoleContainer) consoleContainer.classList.add('locked');
+        currentUserId = null;
+        gameInitialized = false; // Reset game state on full logout
+        
+        setConsoleAccess(false); // Disable Nav buttons (except dashboard for help)
+        
+        // Clear the terminal and prompt the user 
+        clearLog();
+        appendToLog("// PILGRIM OS v1.2: SYSTEM STANDBY.");
+        
+        if(messageEl) messageEl.textContent = 'Session ended. Access key required.';
+    }
+}
+
+
+/**
+ * Handles the login attempt from the dedicated login screen using Realtime Database.
+ * It will check for credentials and create a new user if one doesn't exist.
  */
 async function handleLoginScreen() {
     const usernameEl = document.getElementById('login-username'); 
@@ -421,91 +465,55 @@ async function handleLoginScreen() {
         return;
     }
 
-    // --- FAUX EMAIL LOGIC ---
-    const email = `${username}@pilgrim.ship`; 
-    // ------------------------
+    // --- REALTIME DATABASE LOGIN/CREATION LOGIC ---
+    const userRef = db.ref('users/' + username);
+    messageEl.textContent = 'ACCESSING CORP. DATABASE...';
 
     try {
-        messageEl.textContent = 'ACCESSING CORP. DATABASE...';
-        
-        // 1. Try to sign in
-        await auth.signInWithEmailAndPassword(email, password);
-        
-        // If sign-in is successful, the auth listener handles the rest.
-        
-    } catch (error) {
-        if (error.code === 'auth/user-not-found') {
-            
-            // 2. If user not found, try to create a new user (account creation)
-            try {
-                messageEl.textContent = 'New Pilot Profile Detected. Initializing...';
-                await auth.createUserWithEmailAndPassword(email, password);
-                
-                // If creation is successful, the auth listener handles the rest.
-                
-            } catch (createError) {
-                // Handle creation errors (e.g., email already in use, bad format)
-                messageEl.textContent = `LOGIN ERROR: ${createError.message.replace('Firebase:', '').trim()}`;
+        const snapshot = await userRef.once('value');
+        const userData = snapshot.val();
+
+        if (snapshot.exists() && userData && userData.password) {
+            // 1. User exists, check password
+            if (userData.password === password) {
+                messageEl.textContent = 'ACCESS GRANTED. PILOT AUTHENTICATED.';
+                // Manually trigger the login state change
+                updateAuthState(username); 
+            } else {
+                messageEl.textContent = 'LOGIN ERROR: Invalid Pilot ID or Access Key.';
             }
-            
         } else {
-            // Handle other errors (e.g., wrong password, network issues)
-            messageEl.textContent = `LOGIN ERROR: ${error.message.replace('Firebase:', '').trim()}`;
+            // 2. User does not exist, create new user
+            messageEl.textContent = 'New Pilot Profile Detected. Initializing...';
+            await userRef.update({ 
+                password: password, 
+                // Any other initial user data can be added here
+            });
+            messageEl.textContent = 'PROFILE CREATED. ACCESS GRANTED.';
+            // Manually trigger the login state change
+            updateAuthState(username); 
         }
+    } catch (error) {
+        // Handle database or network errors
+        messageEl.textContent = `LOGIN ERROR: Database or network issue.`;
+        appendToLog(`[ERR] Database operation error: ${error.message}`);
     }
+    // --- END REALTIME DATABASE LOGIC ---
 }
 
 
 /**
- * Sets up the Firebase Authentication listener. This is the new entry point.
+ * Sets up the initial state (logged out).
  */
 function setupAuthListener() {
-    const loginScreen = document.getElementById('login-screen');
-    const consoleContainer = document.getElementById('console-container');
-
-    auth.onAuthStateChanged((user) => {
-        if (user) {
-            // User is signed in. HIDE LOGIN SCREEN.
-            if(loginScreen) loginScreen.style.display = 'none';
-            if(consoleContainer) consoleContainer.classList.remove('locked');
-            currentUserId = user.uid;
-            appendToLog(`[AUTH] Welcome, Pilot ${user.email.split('@')[0]}. System access granted.`);
-            
-            setConsoleAccess(true); // Enable Nav buttons (with mobile restrictions)
-            
-            if (!gameInitialized) {
-                loadInitialData(user.uid); 
-                
-                // Set the initial screen based on device type (NEW LOGIC)
-                const startScreen = isMobileDevice() ? 'personnel' : 'dashboard'; 
-                switchScreen(startScreen); 
-            }
-            
-        } else {
-            // User is signed out. SHOW LOGIN SCREEN.
-            if(loginScreen) loginScreen.style.display = 'flex';
-            if(consoleContainer) consoleContainer.classList.add('locked');
-            currentUserId = null;
-            
-            setConsoleAccess(false); // Disable Nav buttons (except dashboard for help)
-            
-            // Clear the terminal and prompt the user 
-            clearLog();
-            appendToLog("// PILGRIM OS v1.2: SYSTEM STANDBY.");
-            
-            const messageEl = document.getElementById('login-message');
-            if(messageEl) messageEl.textContent = 'Session ended. Access key required.';
-        }
-    });
+    // Manually set the initial logged-out state
+    updateAuthState(null);
 }
 
 async function logoutUser() {
-    try {
-        await auth.signOut();
-        // The auth.onAuthStateChanged listener will handle the logout state
-    } catch (error) {
-        appendToLog(`[AUTH] LOGOUT ERROR: ${error.message}`);
-    }
+    // Manually trigger the logout state change
+    updateAuthState(null);
+    appendToLog(`[AUTH] Session ended.`);
 }
 
 // --- ASYNC REPAIR LOGIC FUNCTIONS (UPDATED TO CALL SAVE) ---
