@@ -602,6 +602,8 @@ input[type="text"]:focus {
 
     /* NEW: Comms screen stacking for mobile */
     .comms-grid {
+	display: grid !important;
+
         /* Override desktop 2-column grid */
         grid-template-columns: 1fr; 
         
