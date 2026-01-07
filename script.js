@@ -13,7 +13,7 @@ const firebaseConfig = {
 // Initialize Firebase App and get service references
 const app = firebase.initializeApp(firebaseConfig);
 const db = firebase.database(); // Reference to Firebase Realtime Database
-let currentUserId = null; // Variable to store the currently logged-in user ID
+let currentUserId = null; // Variable to store the currently logged-in user ID (will be the username)
 let gameInitialized = false; // Flag to prevent re-initializing game loops
 // --- END FIREBASE INTEGRATION ---
 
@@ -119,6 +119,10 @@ function switchScreen(screenName) {
 const logEl = document.getElementById('terminalLog'); 
 const commandInputEl = document.getElementById('commandInput'); 
 
+// NEW COMMS LOG VARIABLES
+let commsLogEl; 
+let commsInputEl;
+
 function appendToLog(text) {
     const time = new Date().toLocaleTimeString();
     const newEntry = `\n[${time}] ${text}`;
@@ -136,6 +140,34 @@ async function typeText(text, delay) {
     appendToLog(text); 
     await sleep(delay * 300); 
 }
+
+// NEW COMMS LOG FUNCTIONS
+function appendToCommsLog(text, isCommand = false) {
+    if (!commsLogEl) {
+        console.error("Comms log element not initialized.");
+        return;
+    }
+    const time = new Date().toLocaleTimeString();
+    let newEntry;
+    
+    // Commands and prompts use a different color/style
+    if (isCommand) {
+        newEntry = `\n[${time}] > ${text}`;
+    } else {
+        newEntry = `\n[${time}] ${text}`;
+    }
+    
+    commsLogEl.innerText += newEntry;
+    commsLogEl.scrollTop = commsLogEl.scrollHeight; 
+}
+
+function clearCommsLog() {
+    if (commsLogEl) commsLogEl.innerText = '// COMMS LOG CLEARED.';
+}
+
+// --- GLITCH EFFECT LOGIC ---
+/**
+ * Applies a visual glitch/seizure effect...
 
 // --- GLITCH EFFECT LOGIC ---
 /**
@@ -306,8 +338,119 @@ async function executeCommand() {
 }
 
 
+// INSERTION 3: NEW COMMS COMMAND HANDLER
+async function executeCommsCommand() {
+    // NOTE: comsInputEl is used to read input and clear it
+    if (!commsInputEl) return;
+    
+    const input = commsInputEl.value.trim(); 
+    commsInputEl.value = '';
+    
+    // Command parsing logic
+    const parts = input.toUpperCase().split(' ');
+    const command = parts[0];
+    const argument = parts.length > 1 ? parts.slice(1).join(' ') : null; 
+    
+    // --- RESTRICT ALL OTHER COMMANDS IF NOT LOGGED IN ---
+    if (!currentUserId && command !== 'HELP' && command !== 'CLEAR') {
+        appendToCommsLog(`// ERROR: ACCESS DENIED. LOGIN REQUIRED.`, true);
+        return;
+    }
+    
+    if (input) {
+         // Display user input first (using the original command casing for better display)
+         appendToCommsLog(input, true); 
+    }
+
+    if (!input) return;
+
+    let response = "";
+    
+    switch (command) {
+        case 'HELP':
+            response = "// AVAILABLE COMMS COMMANDS:\n" +
+                       "// SCAN: Run local signal sweep and array diagnostic.\n" +
+                       "// RELAY STATUS: Check link to Corporate Relay 49.\n" +
+                       "// ENCRYPT: Encrypt current data stream (Security Tier 3).\n" +
+                       "// SIGNAL <FREQ>: Attempt to tune to a specific frequency (e.g. 49.8).\n" +
+                       "// DECRYPT <ID>: Attempt to decrypt a signal ID from a recent SCAN (e.g., DECRYPT 2).\n" +
+                       "// CLEAR: Clear the console log.";
+            break;
+            
+        case 'SCAN':
+            if (shipData.comms.status.includes("OFFLINE") || shipData.engine.status.includes("FAILURE")) {
+                response = "// COMMS ARRAY POWER LOW. SCAN FAILED. CHECK ENGINEERING (ENGINE/POWER).";
+            } else {
+                await glitchEffect(100); 
+                response = "// RUNNING SWEEP: DETECTED 3 SIGNATURES. Signal strength 20% - 60%... Analyzing...\n" +
+                           "// [ID 1] [0.22 LY] Freighter 'Argo' (Corporate Logistics)\n" +
+                           "// [ID 2] [0.89 LY] Unknown Military Signal (Low Bandwidth)\n" +
+                           "// [ID 3] [1.50 LY] Distant Planetary Broadcast (Civilian)";
+            }
+            break;
+            
+        case 'RELAY':
+            if (argument === 'STATUS') {
+                 if (shipData.comms.status.includes("ONLINE")) {
+                    response = "// LINK STATUS: GREEN. Ping 89ms. Uptime 4h 32m. Bandwidth 98.7%.";
+                } else {
+                    response = "// CORPORATE RELAY 49: OFFLINE. NO CONNECTION DETECTED.";
+                }
+            } else {
+                 response = `// ERROR: UNKNOWN COMMAND ARGUMENT. Did you mean 'RELAY STATUS'?`;
+            }
+            break;
+            
+        case 'ENCRYPT':
+            response = "// DATA STREAM ENCRYPTED: AES-256 Protocol Activated. Tier 3 Security.";
+            shipData.comms.status = "ONLINE (ENCRYPTED)";
+            updateDashboard(); 
+            break;
+            
+        case 'SIGNAL':
+            const freq = parseFloat(argument);
+            if (isNaN(freq)) {
+                response = "// ERROR: SIGNAL COMMAND REQUIRES A FREQUENCY (e.g. SIGNAL 49.8).";
+            } else if (freq === 49.8) {
+                response = `// TUNING COMM ARRAY TO FREQ ${freq.toFixed(1)} MHz... (Unknown Military Signal)... \n` +
+                           "// DECRYPTION INITIATED. INCOMING MESSAGE BUFFERED:\n" +
+                           "// [--- STATIC ---] ...Pilgrim... target... Icarus... [--- STATIC ---]";
+            } else {
+                 response = `// TUNING COMM ARRAY TO FREQ ${freq.toFixed(1)} MHz... NO CLEAR SIGNAL DETECTED.`;
+            }
+            break;
+            
+        case 'DECRYPT':
+            const id = parseInt(argument);
+            if (isNaN(id)) {
+                response = "// ERROR: DECRYPT COMMAND REQUIRES A SIGNAL ID (e.g. DECRYPT 2).";
+            } else if (id === 2) {
+                 response = "// ERROR: SIGNAL ID 2 (Unknown Military Signal) REQUIRES DECRYPTION KEY (LEVEL 9). ACCESS DENIED.";
+            } else if (id === 1) {
+                 response = "// DECRYPTING SIGNAL ID 1 (Freighter Argo)... DECRYPTION SUCCESSFUL.\n// MESSAGE: Cargo manifest transmission scheduled for 0400 local. Payload secured. Have a nice flight, Pilgrim.";
+            } else if (id === 3) {
+                 response = "// DECRYPTING SIGNAL ID 3 (Distant Planetary Broadcast)... DECRYPTION SUCCESSFUL.\n// MESSAGE: [Broadcast] ...The Galactic Games have been postponed indefinitely. Stay tuned for updates on the latest orbital stock market fluctuations...";
+            } else {
+                 response = `// ERROR: UNKNOWN SIGNAL ID ${id}. RUN SCAN FIRST.`;
+            }
+            break;
+
+        case 'CLEAR':
+            clearCommsLog();
+            return;
+            
+        default:
+            response = `// ERROR: UNKNOWN COMMS COMMAND '${command}'. TYPE 'HELP' FOR ASSISTANCE.`;
+            break;
+    }
+
+    if (response) {
+        appendToCommsLog(response);
+    }
+}
+
 // =====================================================================
-// === AUTHENTICATION AND DATA LOGIC (Modified) ===
+// === AUTHENTICATION AND DATA LOGIC (MODIFIED) ===
 // =====================================================================
 
 /**
@@ -362,6 +505,7 @@ function setConsoleAccess(enabled) {
  * @param {string} userId - The unique ID (now the username) of the current user.
  */
 function loadInitialData(userId) {
+    // Ship data is still loaded/saved under a /users/ path to keep user-specific save data.
     const shipDataRef = db.ref('users/' + userId + '/shipData');
 
     shipDataRef.once('value', (snapshot) => {
@@ -370,6 +514,7 @@ function loadInitialData(userId) {
             Object.assign(shipData, dbShipData);
             appendToLog("[DATA] Ship status loaded from persistent log.");
         } else {
+             // Initialize new ship data if none exists for this user
              shipDataRef.set(shipData);
              appendToLog("[DATA] New pilot ship data initialized in cloud log.");
         }
@@ -441,8 +586,8 @@ function updateAuthState(userId) {
 
 
 /**
- * Handles the login attempt from the dedicated login screen using Realtime Database.
- * It will check for credentials and create a new user if one doesn't exist.
+ * Handles the login attempt from the dedicated login screen, now authenticating 
+ * against the 'player_profiles' list with 'username' and 'password' nodes.
  */
 async function handleLoginScreen() {
     const usernameEl = document.getElementById('login-username'); 
@@ -465,40 +610,47 @@ async function handleLoginScreen() {
         return;
     }
 
-    // --- REALTIME DATABASE LOGIN/CREATION LOGIC ---
-    const userRef = db.ref('users/' + username);
-    messageEl.textContent = 'ACCESSING CORP. DATABASE...';
+    // --- NEW: AUTHENTICATE AGAINST PLAYER_PROFILES LIST ---
+    const profilesRef = db.ref('player_profiles');
+    messageEl.textContent = 'ACCESSING CREW ROSTER...';
 
     try {
-        const snapshot = await userRef.once('value');
-        const userData = snapshot.val();
+        const snapshot = await profilesRef.once('value');
+        const profiles = snapshot.val(); // This will be an array-like object in RTD
 
-        if (snapshot.exists() && userData && userData.password) {
-            // 1. User exists, check password
-            if (userData.password === password) {
-                messageEl.textContent = 'ACCESS GRANTED. PILOT AUTHENTICATED.';
-                // Manually trigger the login state change
-                updateAuthState(username); 
-            } else {
-                messageEl.textContent = 'LOGIN ERROR: Invalid Pilot ID or Access Key.';
+        let authenticated = false;
+        let matchedUsername = null;
+
+        // Iterate through the profiles object
+        // NOTE: The .json export uses keys '1', '2', '3' for the profiles
+        for (const key in profiles) {
+            const profile = profiles[key];
+            
+            // Ensure the profile has a username and password before checking
+            if (profile && profile.username && profile.password) {
+                // Check for case-insensitive username match and case-sensitive password match
+                if (profile.username.toUpperCase() === username.toUpperCase() && profile.password === password) {
+                    authenticated = true;
+                    matchedUsername = profile.username;
+                    break; 
+                }
             }
+        }
+
+        if (authenticated) {
+            messageEl.textContent = 'ACCESS GRANTED. PILOT AUTHENTICATED.';
+            // Manually trigger the login state change using the matched username (to ensure correct case for later data saves)
+            updateAuthState(matchedUsername); 
         } else {
-            // 2. User does not exist, create new user
-            messageEl.textContent = 'New Pilot Profile Detected. Initializing...';
-            await userRef.update({ 
-                password: password, 
-                // Any other initial user data can be added here
-            });
-            messageEl.textContent = 'PROFILE CREATED. ACCESS GRANTED.';
-            // Manually trigger the login state change
-            updateAuthState(username); 
+            // No matching profile found in the roster
+            messageEl.textContent = 'LOGIN ERROR: Invalid Pilot ID or Access Key.';
         }
     } catch (error) {
         // Handle database or network errors
         messageEl.textContent = `LOGIN ERROR: Database or network issue.`;
         appendToLog(`[ERR] Database operation error: ${error.message}`);
     }
-    // --- END REALTIME DATABASE LOGIC ---
+    // --- END NEW REALTIME DATABASE LOGIC ---
 }
 
 
@@ -830,8 +982,10 @@ function isMobileDevice() {
 // --- INIT (The Core Fix) ---
 // =====================================================================
 window.onload = function() {
-    // CORRECTED: Initialize the global commsLog variable here
-    commsLog = document.getElementById('comms-log');
+
+// COMMS INITIALIZATION
+    commsLogEl = document.getElementById('commsLog'); // ID from index.html: <pre id="commsLog">
+    commsInputEl = document.getElementById('commsInput'); // ID from index.html: <input type="text" id="commsInput">
 
     // 1. START the Authentication Listener FIRST.
     setupAuthListener(); 

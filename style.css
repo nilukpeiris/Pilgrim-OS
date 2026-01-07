@@ -599,24 +599,6 @@ input[type="text"]:focus {
         padding: 8px 5px; /* Adjust padding to save horizontal space */
         font-size: 0.8rem; /* Slightly smaller font to fit more text */
     }
-
-    /* NEW: Comms screen stacking for mobile */
-    .comms-grid {
-	display: grid !important;
-
-        /* Override desktop 2-column grid */
-        grid-template-columns: 1fr; 
-        
-        /* Set new row layout: Header (auto), Left Panel (auto height), Right Panel (fills rest) */
-        grid-template-rows: auto auto 1fr; 
-        
-        /* Re-define areas to stack vertically: Header -> Left Panel -> Right Terminal */
-        grid-template-areas: 
-            "header"
-            "left"
-            "right";
-        gap: 15px; /* Slightly reduce gap for mobile */
-    }
 }
 
 /* --- NEW: GLITCH/SEIZURE EFFECT STYLES (REVISED) --- */
@@ -837,34 +819,25 @@ body.glitch-transition {
 
 /* --- NEW COMMS SCREEN STYLES --- */
 
-/* NEW COMMS GRID LAYOUT */
+/* MODIFIED COMMS GRID LAYOUT TO STACK VERTICALLY */
 .comms-grid {
-    /* This overrides the .full-height-flex display and sets up a grid */
-    display: grid; 
-    /* Define 2 columns: 0.25 (25%) and 0.75 (75%) */
-    grid-template-columns: 0.25fr 0.75fr;
-    
-    /* Define 2 rows: H2 takes auto height, grid content takes the rest */
-    grid-template-rows: auto 1fr; 
-    
-    /* Assign areas for layout */
-    grid-template-areas: 
-        "header header"
-        "left right";
-    
+    display: flex; 
+    flex-direction: column; 
+    height: 100%; 
     gap: 20px;
 }
 
 /* Ensure the header spans all columns */
 .comms-grid h2 {
-    grid-area: header;
-    margin-bottom: 0; /* Remove margin so gap controls spacing */
+    /* No grid-area needed in flex layout */
+    margin-bottom: 0; 
 }
 
 /* Assign areas to the new panels */
 #commsLeftPanel {
-    grid-area: left;
-    height: 100%; /* Ensure left panel fills the vertical space */
+    /* No grid-area needed in flex layout */
+    height: auto; 
+    max-height: 25%; /* To ensure it doesn't take up too much vertical space */
     display: flex;
     flex-direction: column;
     /* FIX: Remove the default margin-bottom from .status-card so the box stretches to 100% of the grid row height */
@@ -872,8 +845,9 @@ body.glitch-transition {
 }
 
 #commsTerminalWrapper {
-    grid-area: right;
-    height: 100%; /* Ensure wrapper fills vertical space */
+    /* No grid-area needed in flex layout */
+    height: 100%; 
+    flex-grow: 1; /* Makes it fill the remaining vertical space */
     display: flex;
     flex-direction: column;
 }
