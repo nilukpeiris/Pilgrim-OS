@@ -20,6 +20,9 @@ let gameInitialized = false; // Flag to prevent re-initializing game loops
 
 // --- DATA & CONFIGURATION ---
 
+// NEW: CENTRAL PATH FOR SHARED GAME STATE
+const CENTRAL_SHIP_PATH = 'shipState'; 
+
 // --- PASSWORDS & KEYS (SECRET - DO NOT DISPLAY) ---
 const ENGINE_FIX_CODE = "FIXENGINESNOW"; 
 const HULL_FIX_CODE = "FIXHULLNOW";       
@@ -446,7 +449,7 @@ async function executeCommsCommand() {
 }
 
 // =====================================================================
-// === AUTHENTICATION AND DATA LOGIC (MODIFIED) ===
+// === AUTHENTICATION AND DATA LOGIC (MODIFIED FOR SHARED STATE) ===
 // =====================================================================
 
 /**
@@ -498,21 +501,22 @@ function setConsoleAccess(enabled) {
 
 /**
  * Loads game data from the Realtime Database once the user is authenticated.
- * @param {string} userId - The unique ID (now the username) of the current user.
+ * MODIFIED to load from a central, shared path.
+ * @param {string} userId - The unique ID (now the username) of the current user (only used for logging).
  */
 function loadInitialData(userId) {
-    // Ship data is still loaded/saved under a /users/ path to keep user-specific save data.
-    const shipDataRef = db.ref('users/' + userId + '/shipData');
+    // MODIFIED: Reference is now a central, shared path.
+    const shipDataRef = db.ref(CENTRAL_SHIP_PATH);
 
     shipDataRef.once('value', (snapshot) => {
         const dbShipData = snapshot.val();
         if (dbShipData) {
             Object.assign(shipData, dbShipData);
-            appendToLog("[DATA] Ship status loaded from persistent log.");
+            appendToLog("[DATA] Ship status loaded from persistent log (SHARED STATE)."); // UPDATED LOG
         } else {
-             // Initialize new ship data if none exists for this user
+             // Initialize new ship data if none exists at the central path
              shipDataRef.set(shipData);
-             appendToLog("[DATA] New pilot ship data initialized in cloud log.");
+             appendToLog("[DATA] Central ship data initialized in cloud log."); // UPDATED LOG
         }
         
         // Start game loops and UI updates only after data is loaded
@@ -527,11 +531,12 @@ function loadInitialData(userId) {
 
 /**
  * Persists the current ship data to the Realtime Database.
+ * MODIFIED to save to the central, shared path.
  */
 function saveShipData() {
-    if (currentUserId) {
-        // Removed powerState save
-        db.ref('users/' + currentUserId + '/shipData').set(shipData)
+    if (currentUserId) { // Only allow saving if a user is logged in
+        // MODIFIED: Saves to the central path
+        db.ref(CENTRAL_SHIP_PATH).set(shipData)
           .catch(error => appendToLog(`[ERR] Failed to save ship data: ${error.message}`));
     }
 }
@@ -635,11 +640,6 @@ async function handleLoginScreen() {
 
         if (authenticated) {
             messageEl.textContent = 'ACCESS GRANTED. PILOT AUTHENTICATED.';
-            
-            // --- SAVE TO LOCAL STORAGE FOR PERSISTENCE ---
-            localStorage.setItem('pilgrimCurrentUser', matchedUsername); 
-            // ---------------------------------------------
-
             // Manually trigger the login state change using the matched username (to ensure correct case for later data saves)
             updateAuthState(matchedUsername); 
         } else {
@@ -656,32 +656,20 @@ async function handleLoginScreen() {
 
 
 /**
- * Sets up the initial state (logged out), CHECKING LOCAL STORAGE FIRST.
+ * Sets up the initial state (logged out).
  */
 function setupAuthListener() {
-    // Check if we have a username saved from a previous visit
-    const storedUser = localStorage.getItem('pilgrimCurrentUser');
-
-    if (storedUser) {
-        // If yes, automatically log them back in using that stored username
-        updateAuthState(storedUser);
-        appendToLog(`[AUTH] Session restored for ${storedUser}.`);
-    } else {
-        // If no stored user, start in the logged-out state
-        updateAuthState(null);
-    }
+    // Manually set the initial logged-out state
+    updateAuthState(null);
 }
 
 async function logoutUser() {
-    // Clear the stored session so they aren't automatically logged back in
-    localStorage.removeItem('pilgrimCurrentUser');
-
     // Manually trigger the logout state change
     updateAuthState(null);
     appendToLog(`[AUTH] Session ended.`);
 }
 
-// --- ASYNC REPAIR LOGIC FUNCTIONS (MODIFIED TO REMOVE IMAGE UPDATE) ---
+// --- ASYNC REPAIR LOGIC FUNCTIONS (CLEANED UP IMAGE LOGIC) ---
 
 async function applyEngineFixLogic() {
     if (shipData.engine.status.includes("FAILURE")) {
@@ -693,7 +681,8 @@ async function applyEngineFixLogic() {
         
         shipData.engine.status = "ONLINE / STANDBY";
         
-        // ** Removed image update here, now handled by updateDashboard() **
+        // REMOVED: Redundant image setting. It will now be handled by updateDashboard().
+        
         appendToLog("[ENGINE] ARRAY ONLINE. STABILITY 99.8%.");
         saveShipData(); // Save state
     } else {
@@ -711,7 +700,8 @@ async function applyHullFixLogic() {
         
         shipData.hull.status = "NOMINAL (SEALED)";
         
-        // ** Removed image update here, now handled by updateDashboard() **
+        // REMOVED: Redundant image setting. It will now be handled by updateDashboard().
+
         appendToLog("[HULL] BREACH SEALED. INTEGRITY 100%.");
         saveShipData(); // Save state
     } else {
@@ -765,6 +755,7 @@ function startO2LogicLoop() {
     }, 1000);
 }
 
+// MODIFIED: Added logic to update engineering images based on shipData.
 function updateDashboard() {
     // Clock
     document.getElementById('time').textContent = new Date().toLocaleTimeString();
@@ -780,10 +771,7 @@ function updateDashboard() {
         document.getElementById('hullIconCard').querySelector('.icon-symbol').innerHTML = '&#9937;'; 
     }
     document.getElementById('hullStatus').textContent = shipData.hull.status;
-    // Update Engineering text displays
-    const hullDisplay = document.getElementById('hull-status-display');
-    if (hullDisplay) hullDisplay.textContent = shipData.hull.status; 
-    
+
     // --- ENGINE DASHBOARD CARD ---
     const engineCard = document.getElementById('engineIconCard');
     engineCard.classList.remove('critical', 'nominal');
@@ -795,44 +783,8 @@ function updateDashboard() {
         document.getElementById('engineIconCard').querySelector('.icon-symbol').innerHTML = '&#9881;'; 
     }
     document.getElementById('engineStatus').textContent = shipData.engine.status;
-    // Update Engineering text displays
-    const engDisplay = document.getElementById('eng-status-display');
-    if (engDisplay) engDisplay.textContent = shipData.engine.status; 
-    
-    // ----------------------------------------------------------------
-    // --- ENGINEERING BLUEPRINT IMAGE PERSISTENCE (NEW LOGIC ADDED) ---
-    // ----------------------------------------------------------------
 
-    // 1. Hull Blueprint Image
-    const hullImage = document.getElementById('hullStatusImage');
-    if (hullImage) {
-        if (shipData.hull.status.includes("BREACH")) {
-            // Hull is damaged
-            hullImage.src = "shipimage1.png";
-            hullImage.style.borderColor = "var(--alert-color)"; 
-        } else {
-            // Hull is fixed
-            hullImage.src = "shipimage2.png";
-            hullImage.style.borderColor = "var(--primary-color)"; 
-        }
-    }
-
-    // 2. Engine Blueprint Image
-    const engineImage = document.getElementById('engineStatusImage');
-    if (engineImage) {
-        if (shipData.engine.status.includes("FAILURE")) {
-            // Engine is damaged
-            engineImage.src = "shipenginesdamaged.gif";
-            engineImage.style.borderColor = "var(--alert-color)"; 
-        } else {
-            // Engine is fixed
-            engineImage.src = "shipenginesfixed.png";
-            engineImage.style.borderColor = "var(--primary-color)"; 
-        }
-    }
-    // ----------------------------------------------------------------
-
-    // --- COMMS ---
+    // --- COMMS DASHBOARD CARD ---
     const commsCard = document.getElementById('commsIconCard');
     commsCard.classList.remove('warning', 'nominal');
     if (shipData.comms.status.includes("OFFLINE")) {
@@ -844,7 +796,7 @@ function updateDashboard() {
     }
     document.getElementById('commsStatus').textContent = shipData.comms.status;
 
-    // --- COORDS ---
+    // --- COORDS DASHBOARD CARD ---
     const coordCard = document.getElementById('coordIconCard');
     coordCard.classList.remove('warning', 'nominal');
     if (shipData.coords.status.includes("CORRUPTED")) { 
@@ -872,7 +824,44 @@ function updateDashboard() {
     else if(shipData.o2.level < 50) gauge.style.background = "orange";
     else gauge.style.background = "var(--primary-color)";
     
-    // --- REMOVED: NEW ENGINEERING POWER DISPLAY ---
+    // =========================================================
+    // === NEW LOGIC: ENGINEERING TAB IMAGE STATUS UPDATE ===
+    // =========================================================
+    const hullImage = document.getElementById('hullStatusImage');
+    const engineImage = document.getElementById('engineStatusImage');
+    const hullDisplay = document.getElementById('hull-status-display');
+    const engDisplay = document.getElementById('eng-status-display');
+
+    // 1. Hull Image Logic
+    if (shipData.hull.status.includes("BREACH")) {
+        if (hullImage) {
+            hullImage.src = "shipimage1.png";
+            hullImage.style.borderColor = "var(--alert-color)";
+        }
+    } else if (shipData.hull.status.includes("NOMINAL")) {
+        if (hullImage) {
+            hullImage.src = "shipimage2.png";
+            hullImage.style.borderColor = "var(--primary-color)";
+        }
+    }
+    
+    // 2. Engine Image Logic
+    if (shipData.engine.status.includes("FAILURE")) {
+        if (engineImage) {
+            engineImage.src = "shipenginesdamaged.gif";
+            engineImage.style.borderColor = "var(--alert-color)";
+        }
+    } else if (shipData.engine.status.includes("ONLINE")) {
+        if (engineImage) {
+            engineImage.src = "shipenginesfixed.png";
+            engineImage.style.borderColor = "var(--primary-color)";
+        }
+    }
+    
+    // 3. Update Engineering text displays (re-running this to ensure consistency)
+    if (hullDisplay) hullDisplay.textContent = shipData.hull.status; 
+    if (engDisplay) engDisplay.textContent = shipData.engine.status; 
+    // =========================================================
 }
 
 function displaySectorScan() {
@@ -1031,7 +1020,7 @@ window.onload = function() {
     // 2. Run non-dynamic, non-looping initial UI updates
     displayCrewList();
     displaySectorScan();
-    // updateDashboard() is called by loadInitialData() after data is fetched
+    updateDashboard();
 
     // 3. Run non-login-dependent features
     startGlitchLoop();
