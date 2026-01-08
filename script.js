@@ -167,10 +167,6 @@ function clearCommsLog() {
 
 // --- GLITCH EFFECT LOGIC ---
 /**
- * Applies a visual glitch/seizure effect...
-
-// --- GLITCH EFFECT LOGIC ---
-/**
  * Applies a visual glitch/seizure effect to the whole page and recovers.
  * @param {number} duration - The duration in milliseconds the main effect lasts.
  */
@@ -639,6 +635,11 @@ async function handleLoginScreen() {
 
         if (authenticated) {
             messageEl.textContent = 'ACCESS GRANTED. PILOT AUTHENTICATED.';
+            
+            // --- SAVE TO LOCAL STORAGE FOR PERSISTENCE ---
+            localStorage.setItem('pilgrimCurrentUser', matchedUsername); 
+            // ---------------------------------------------
+
             // Manually trigger the login state change using the matched username (to ensure correct case for later data saves)
             updateAuthState(matchedUsername); 
         } else {
@@ -655,20 +656,32 @@ async function handleLoginScreen() {
 
 
 /**
- * Sets up the initial state (logged out).
+ * Sets up the initial state (logged out), CHECKING LOCAL STORAGE FIRST.
  */
 function setupAuthListener() {
-    // Manually set the initial logged-out state
-    updateAuthState(null);
+    // Check if we have a username saved from a previous visit
+    const storedUser = localStorage.getItem('pilgrimCurrentUser');
+
+    if (storedUser) {
+        // If yes, automatically log them back in using that stored username
+        updateAuthState(storedUser);
+        appendToLog(`[AUTH] Session restored for ${storedUser}.`);
+    } else {
+        // If no stored user, start in the logged-out state
+        updateAuthState(null);
+    }
 }
 
 async function logoutUser() {
+    // Clear the stored session so they aren't automatically logged back in
+    localStorage.removeItem('pilgrimCurrentUser');
+
     // Manually trigger the logout state change
     updateAuthState(null);
     appendToLog(`[AUTH] Session ended.`);
 }
 
-// --- ASYNC REPAIR LOGIC FUNCTIONS (UPDATED TO CALL SAVE) ---
+// --- ASYNC REPAIR LOGIC FUNCTIONS (MODIFIED TO REMOVE IMAGE UPDATE) ---
 
 async function applyEngineFixLogic() {
     if (shipData.engine.status.includes("FAILURE")) {
@@ -680,11 +693,7 @@ async function applyEngineFixLogic() {
         
         shipData.engine.status = "ONLINE / STANDBY";
         
-        const engineImage = document.getElementById('engineStatusImage');
-        if (engineImage) {
-            engineImage.src = "shipenginesfixed.png"; 
-            engineImage.style.borderColor = "var(--primary-color)"; 
-        }
+        // ** Removed image update here, now handled by updateDashboard() **
         appendToLog("[ENGINE] ARRAY ONLINE. STABILITY 99.8%.");
         saveShipData(); // Save state
     } else {
@@ -702,11 +711,7 @@ async function applyHullFixLogic() {
         
         shipData.hull.status = "NOMINAL (SEALED)";
         
-        const hullImage = document.getElementById('hullStatusImage');
-        if (hullImage) {
-            hullImage.src = "shipimage2.png";
-            hullImage.style.borderColor = "var(--primary-color)"; 
-        }
+        // ** Removed image update here, now handled by updateDashboard() **
         appendToLog("[HULL] BREACH SEALED. INTEGRITY 100%.");
         saveShipData(); // Save state
     } else {
@@ -764,7 +769,7 @@ function updateDashboard() {
     // Clock
     document.getElementById('time').textContent = new Date().toLocaleTimeString();
     
-    // --- HULL ---
+    // --- HULL DASHBOARD CARD ---
     const hullCard = document.getElementById('hullIconCard');
     hullCard.classList.remove('critical', 'nominal');
     if (shipData.hull.status.includes("BREACH")) {
@@ -779,7 +784,7 @@ function updateDashboard() {
     const hullDisplay = document.getElementById('hull-status-display');
     if (hullDisplay) hullDisplay.textContent = shipData.hull.status; 
     
-    // --- ENGINE ---
+    // --- ENGINE DASHBOARD CARD ---
     const engineCard = document.getElementById('engineIconCard');
     engineCard.classList.remove('critical', 'nominal');
     if (shipData.engine.status.includes("FAILURE")) {
@@ -793,6 +798,39 @@ function updateDashboard() {
     // Update Engineering text displays
     const engDisplay = document.getElementById('eng-status-display');
     if (engDisplay) engDisplay.textContent = shipData.engine.status; 
+    
+    // ----------------------------------------------------------------
+    // --- ENGINEERING BLUEPRINT IMAGE PERSISTENCE (NEW LOGIC ADDED) ---
+    // ----------------------------------------------------------------
+
+    // 1. Hull Blueprint Image
+    const hullImage = document.getElementById('hullStatusImage');
+    if (hullImage) {
+        if (shipData.hull.status.includes("BREACH")) {
+            // Hull is damaged
+            hullImage.src = "shipimage1.png";
+            hullImage.style.borderColor = "var(--alert-color)"; 
+        } else {
+            // Hull is fixed
+            hullImage.src = "shipimage2.png";
+            hullImage.style.borderColor = "var(--primary-color)"; 
+        }
+    }
+
+    // 2. Engine Blueprint Image
+    const engineImage = document.getElementById('engineStatusImage');
+    if (engineImage) {
+        if (shipData.engine.status.includes("FAILURE")) {
+            // Engine is damaged
+            engineImage.src = "shipenginesdamaged.gif";
+            engineImage.style.borderColor = "var(--alert-color)"; 
+        } else {
+            // Engine is fixed
+            engineImage.src = "shipenginesfixed.png";
+            engineImage.style.borderColor = "var(--primary-color)"; 
+        }
+    }
+    // ----------------------------------------------------------------
 
     // --- COMMS ---
     const commsCard = document.getElementById('commsIconCard');
@@ -834,7 +872,7 @@ function updateDashboard() {
     else if(shipData.o2.level < 50) gauge.style.background = "orange";
     else gauge.style.background = "var(--primary-color)";
     
-    // --- REMOVED: NEW ENGINEERING POWER DISPLAY --- 
+    // --- REMOVED: NEW ENGINEERING POWER DISPLAY ---
 }
 
 function displaySectorScan() {
@@ -993,7 +1031,7 @@ window.onload = function() {
     // 2. Run non-dynamic, non-looping initial UI updates
     displayCrewList();
     displaySectorScan();
-    updateDashboard();
+    // updateDashboard() is called by loadInitialData() after data is fetched
 
     // 3. Run non-login-dependent features
     startGlitchLoop();
