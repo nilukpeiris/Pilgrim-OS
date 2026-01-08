@@ -23,6 +23,9 @@ let gameInitialized = false; // Flag to prevent re-initializing game loops
 // NEW: CENTRAL PATH FOR SHARED GAME STATE
 const CENTRAL_SHIP_PATH = 'shipState'; 
 
+// NEW: SECRET COMMAND FOR GAME RESET
+const RESET_CODE = "RESETALL"; // The secret command code to execute a full reset
+
 // --- PASSWORDS & KEYS (SECRET - DO NOT DISPLAY) ---
 const ENGINE_FIX_CODE = "FIXENGINESNOW"; 
 const HULL_FIX_CODE = "FIXHULLNOW";       
@@ -33,14 +36,18 @@ const O2_DECAY_RATE_CRITICAL = 0.04;
 const O2_DECAY_RATE_WARNING = 0.02;  
 const O2_RECOVERY_RATE = 0.05;      
 
-let shipData = {
+// NEW: DEFAULT STATE CONSTANT (Frozen to prevent accidental mutation)
+const DEFAULT_SHIP_DATA = Object.freeze({
     hull: { status: "SEAL BREACH - FORE SECTION", level: 50 },
     engine: { status: "CRITICAL FAILURE" },
     o2: { level: 75.0 }, 
     comms: { status: "OFFLINE" },
     power: { status: "STABLE (RESERVE)" },
     coords: { status: "NAV DATA CORRUPTED" }
-};
+});
+
+// Initialize mutable shipData using a deep copy of the default
+let shipData = JSON.parse(JSON.stringify(DEFAULT_SHIP_DATA)); 
 // END NEW POWER DATA
 
 
@@ -235,7 +242,7 @@ async function executeCommand() {
         // --- EXECUTE COMMANDS (Only if logged in or allowed) ---
         switch (command) {
             case 'HELP':
-                // *** REMOVED TRANSFER from HELP list ***
+                // *** ADD RESETALL to help if you want it visible, otherwise leave as a secret.
                 response = "// AVAILABLE COMMANDS:\n// LOGOUT: End System Session.\n// STATUS: Display current ship systems report.\n// CLEAR: Clear the terminal output.\n// DIAGNOSTICS: Run full systems diagnostic.\n// NAVLOG: Display current navigation clues.\n// CREW: List active crew IDs.\n// O2: Detailed life support reading.\n// COMMS: Check communication link status.\n// REBOOT: Attempt system soft-reboot.\n// SCAN: Run comms array signal sweep (See Comms tab).\n// EXECUTE <code>: Initiates repair/jump protocols (See Engineering Manuals for repair codes).";
                 break;
             case 'STATUS':
@@ -257,6 +264,9 @@ async function executeCommand() {
                  } else if (code === HULL_FIX_CODE) {
                      await applyHullFixLogic(); 
                      return; 
+                 } else if (code === RESET_CODE) { // NEW: Handle the secret reset command
+                     await resetGameData();
+                     return;
                  } else if (code === 'JUMP') {
                      response = "// ERROR: JUMP PROTOCOL MUST BE INITIATED VIA NAV CORE AND REQUIRES 4-DIGIT COORDINATE INPUT.";
                  } else {
@@ -453,6 +463,45 @@ async function executeCommsCommand() {
 // =====================================================================
 
 /**
+ * Executes a full game reset, setting shipData and local variables to default
+ * and pushing the state to Firebase.
+ */
+async function resetGameData() {
+    if (!currentUserId) {
+        appendToLog("[AUTH] RESET FAILED. LOGIN REQUIRED.");
+        return;
+    }
+
+    appendToLog("[SYS] EXECUTE RESETALL: COMMENCING FULL SYSTEM STATE RESTORE...");
+
+    // 1. Reset local ship data to default (deep copy)
+    shipData = JSON.parse(JSON.stringify(DEFAULT_SHIP_DATA)); 
+    
+    // 2. Reset local game state variables
+    currentClueIndex = -1; 
+    navUnlocked = false;
+    o2RecoveryStarted = false;
+    
+    // 3. Save to central Firebase node
+    saveShipData(); 
+    
+    // 4. Update UI
+    updateDashboard();
+    displayCurrentClues();
+    
+    // 5. Restart O2 loop if it was stopped (e.g., O2 hit 0)
+    if (o2DynamicInterval) {
+        clearInterval(o2DynamicInterval);
+        o2DynamicInterval = null;
+    }
+    startO2LogicLoop();
+
+    await glitchEffect(300); // Visual confirmation for reset
+    appendToLog("[SYS] SHIP STATE RESET TO FACTORY DEFAULTS.");
+    appendToLog("[SYS] REBOOT COMPLETE. CRITICAL FAILURES ACTIVE.");
+}
+
+/**
  * Enables/Disables all navigation buttons and command input, applying mobile restrictions.
  * @param {boolean} enabled - true to enable, false to disable.
  */
@@ -511,11 +560,13 @@ function loadInitialData(userId) {
     shipDataRef.once('value', (snapshot) => {
         const dbShipData = snapshot.val();
         if (dbShipData) {
+            // Ensure the local mutable shipData object gets a fresh copy of the persisted data
+            shipData = {...dbShipData}; 
             Object.assign(shipData, dbShipData);
             appendToLog("[DATA] Ship status loaded from persistent log (SHARED STATE)."); // UPDATED LOG
         } else {
              // Initialize new ship data if none exists at the central path
-             shipDataRef.set(shipData);
+             shipDataRef.set(DEFAULT_SHIP_DATA); // Use the default constant for initialization
              appendToLog("[DATA] Central ship data initialized in cloud log."); // UPDATED LOG
         }
         
@@ -742,6 +793,7 @@ function startO2LogicLoop() {
         if(shipData.o2.level < 0) {
             shipData.o2.level = 0;
             clearInterval(o2DynamicInterval);
+            o2DynamicInterval = null; // Set to null so it can be restarted by resetGameData()
             alert("CRITICAL FAILURE: LIFE SUPPORT OFFLINE.");
             saveShipData(); // Save on game over
         }
@@ -835,7 +887,7 @@ function updateDashboard() {
     // 1. Hull Image Logic
     if (shipData.hull.status.includes("BREACH")) {
         if (hullImage) {
-            hullImage.src = "shipimage1.png";
+            hullImage.src = "shipimage1.gif";
             hullImage.style.borderColor = "var(--alert-color)";
         }
     } else if (shipData.hull.status.includes("NOMINAL")) {
