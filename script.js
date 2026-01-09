@@ -514,11 +514,14 @@ function startSharedStateSync() {
     });
 }
 
-// NEW: Function to handle the global reset command
+/**
+ * NEW: Function to handle the global reset command
+ * This function now manually updates the local shipData copy
+ * to ensure immediate UI and O2 logic sync.
+ */
 async function resetShipStateToDefault() {
     appendToLog("// INITIATING SYSTEM WIPE AND SHIPSTATE NODE RESET...");
-
-// *** START: FIX FOR O2 LOOP RESTART ***
+    
     // 1. Clear the old interval timer if it exists.
     if (o2DynamicInterval) {
         clearInterval(o2DynamicInterval);
@@ -526,18 +529,27 @@ async function resetShipStateToDefault() {
     }
     // 2. Reset the flag that prevents the O2 start message from logging repeatedly.
     o2RecoveryStarted = false;
-    // *** END: FIX FOR O2 LOOP RESTART ***
     
-    // This uses the Firebase .set() method to overwrite the entire 'shipState' node
+    // 3. Manually update the local shipData object with the new state.
+    // This immediately sets shipData.o2.level to 75.0, solving the sync issue.
+    // We use a deep copy to ensure shipData is completely fresh.
+    Object.assign(shipData, JSON.parse(JSON.stringify(DEFAULT_SHIP_STATE)));
+    
+    // 4. Update the UI *immediately* to reflect the 75.0% O2 level.
+    updateDashboard(); 
+    
+    // 5. Write the new state to Firebase (this is asynchronous).
     await db.ref(CENTRAL_SHIP_PATH).set(DEFAULT_SHIP_STATE)
         .then(() => {
             appendToLog("// RESET COMPLETE. ShipState node successfully wiped and restored.");
-            // The Firebase listener will pick this up and update the local shipData copy
-            // and trigger updateDashboard() on all connected clients.
+            // The Firebase listener will handle updates for other clients.
         })
         .catch((error) => {
             appendToLog(`// CRITICAL ERROR: FAILED TO RESET SHIPSTATE. Firebase Write Error: ${error.message}`);
         });
+        
+    // 6. Restart the O2 loop, which now correctly reads the new local shipData.o2.level.
+    startO2LogicLoop();
 }
 
 
