@@ -21,10 +21,7 @@ let gameInitialized = false; // Flag to prevent re-initializing game loops
 // --- DATA & CONFIGURATION ---
 
 // NEW: CENTRAL PATH FOR SHARED GAME STATE
-const CENTRAL_SHIP_PATH = 'shipState'; 
-
-// NEW: SECRET COMMAND FOR GAME RESET
-const RESET_CODE = "RESETALL"; // The secret command code to execute a full reset
+const CENTRAL_SHIP_PATH = 'shipState'; // <--- NEW CENTRAL NODE
 
 // --- PASSWORDS & KEYS (SECRET - DO NOT DISPLAY) ---
 const ENGINE_FIX_CODE = "FIXENGINESNOW"; 
@@ -36,18 +33,25 @@ const O2_DECAY_RATE_CRITICAL = 0.04;
 const O2_DECAY_RATE_WARNING = 0.02;  
 const O2_RECOVERY_RATE = 0.05;      
 
-// NEW: DEFAULT STATE CONSTANT (Frozen to prevent accidental mutation)
-const DEFAULT_SHIP_DATA = Object.freeze({
+// NEW: DEFAULT SHIP STATE FOR THE 'RESETALL' COMMAND
+const DEFAULT_SHIP_STATE = {
     hull: { status: "SEAL BREACH - FORE SECTION", level: 50 },
     engine: { status: "CRITICAL FAILURE" },
     o2: { level: 75.0 }, 
     comms: { status: "OFFLINE" },
     power: { status: "STABLE (RESERVE)" },
     coords: { status: "NAV DATA CORRUPTED" }
-});
+};
+// END NEW DEFAULT STATE
 
-// Initialize mutable shipData using a deep copy of the default
-let shipData = JSON.parse(JSON.stringify(DEFAULT_SHIP_DATA)); 
+let shipData = {
+    hull: { status: "SEAL BREACH - FORE SECTION", level: 50 },
+    engine: { status: "CRITICAL FAILURE" },
+    o2: { level: 75.0 }, 
+    comms: { status: "OFFLINE" },
+    power: { status: "STABLE (RESERVE)" },
+    coords: { status: "NAV DATA CORRUPTED" }
+};
 // END NEW POWER DATA
 
 
@@ -242,7 +246,7 @@ async function executeCommand() {
         // --- EXECUTE COMMANDS (Only if logged in or allowed) ---
         switch (command) {
             case 'HELP':
-                // *** ADD RESETALL to help if you want it visible, otherwise leave as a secret.
+                // *** REMOVED TRANSFER from HELP list ***
                 response = "// AVAILABLE COMMANDS:\n// LOGOUT: End System Session.\n// STATUS: Display current ship systems report.\n// CLEAR: Clear the terminal output.\n// DIAGNOSTICS: Run full systems diagnostic.\n// NAVLOG: Display current navigation clues.\n// CREW: List active crew IDs.\n// O2: Detailed life support reading.\n// COMMS: Check communication link status.\n// REBOOT: Attempt system soft-reboot.\n// SCAN: Run comms array signal sweep (See Comms tab).\n// EXECUTE <code>: Initiates repair/jump protocols (See Engineering Manuals for repair codes).";
                 break;
             case 'STATUS':
@@ -264,12 +268,16 @@ async function executeCommand() {
                  } else if (code === HULL_FIX_CODE) {
                      await applyHullFixLogic(); 
                      return; 
-                 } else if (code === RESET_CODE) { // NEW: Handle the secret reset command
-                     await resetGameData();
-                     return;
                  } else if (code === 'JUMP') {
                      response = "// ERROR: JUMP PROTOCOL MUST BE INITIATED VIA NAV CORE AND REQUIRES 4-DIGIT COORDINATE INPUT.";
-                 } else {
+                 } 
+                 // *** START: NEW RESETALL COMMAND LOGIC ***
+                 else if (code === 'RESETALL') {
+                     await resetShipStateToDefault();
+                     return; 
+                 }
+                 // *** END: NEW RESETALL COMMAND LOGIC ***
+                 else {
                      response = `// ERROR: UNKNOWN EXECUTE CODE '${code}'. ACCESS DENIED. CHECK MANUALS.`;
                  }
                  break;
@@ -332,6 +340,7 @@ async function executeCommand() {
                 clearLog();
                 response = "// READY.";
                 break;
+		
             default:
                 if (response === "") {
                     response = `// ERROR: UNKNOWN COMMAND '${input.toUpperCase()}'. TYPE 'HELP' FOR ASSISTANCE.`;
@@ -459,47 +468,78 @@ async function executeCommsCommand() {
 }
 
 // =====================================================================
-// === AUTHENTICATION AND DATA LOGIC (MODIFIED FOR SHARED STATE) ===
+// === SHARED STATE & AUTHENTICATION LOGIC (MODIFIED FOR CENTRAL STATE) ===
 // =====================================================================
 
 /**
- * Executes a full game reset, setting shipData and local variables to default
- * and pushing the state to Firebase.
+ * Sets up the central Firebase listener and initializes the game state and loops.
+ * This is called once on startup to ensure all clients are synchronized.
  */
-async function resetGameData() {
-    if (!currentUserId) {
-        appendToLog("[AUTH] RESET FAILED. LOGIN REQUIRED.");
-        return;
-    }
+function startSharedStateSync() {
+    const shipDataRef = db.ref(CENTRAL_SHIP_PATH);
 
-    appendToLog("[SYS] EXECUTE RESETALL: COMMENCING FULL SYSTEM STATE RESTORE...");
+    // Set up a listener for the central ship state
+    shipDataRef.on('value', (snapshot) => {
+        const dbShipData = snapshot.val();
+        
+        // 1. Load Data
+        if (dbShipData) {
+            // Only apply the state if it's different from the local state 
+            if (JSON.stringify(shipData) !== JSON.stringify(dbShipData)) {
+                 Object.assign(shipData, dbShipData);
+                 // Only log a sync message if the game is already running
+                 if (gameInitialized) { 
+                    //appendToLog("[DATA] Ship status synchronized from Central Log.");
+                 }
+                 updateDashboard(); 
+            }
+        } else {
+             // 2. Initialize Central Node (only runs if the entire node is missing)
+             if (!gameInitialized) { 
+                 // Use the local default state and write it to the central node
+                 shipDataRef.set(JSON.parse(JSON.stringify(shipData))); 
+                 appendToLog("[DATA] Central Ship Log initialized.");
+                 // Note: Firebase listener will trigger again immediately with the new data.
+            }
+        }
+        
+        // 3. Initialize Game Logic (Runs once after the first successful data sync/write)
+        if (!gameInitialized) {
+            startO2LogicLoop();
+            gameInitialized = true;
+            appendToLog("[SYS] Core State Synchronization Online.");
+        }
+    }, (error) => {
+        appendToLog(`[ERR] Database error: ${error.message}`);
+    });
+}
 
-    // 1. Reset local ship data to default (deep copy)
-    shipData = JSON.parse(JSON.stringify(DEFAULT_SHIP_DATA)); 
-    
-    // 2. Reset local game state variables
-    currentClueIndex = -1; 
-    navUnlocked = false;
-    o2RecoveryStarted = false;
-    
-    // 3. Save to central Firebase node
-    saveShipData(); 
-    
-    // 4. Update UI
-    updateDashboard();
-    displayCurrentClues();
-    
-    // 5. Restart O2 loop if it was stopped (e.g., O2 hit 0)
+// NEW: Function to handle the global reset command
+async function resetShipStateToDefault() {
+    appendToLog("// INITIATING SYSTEM WIPE AND SHIPSTATE NODE RESET...");
+
+// *** START: FIX FOR O2 LOOP RESTART ***
+    // 1. Clear the old interval timer if it exists.
     if (o2DynamicInterval) {
         clearInterval(o2DynamicInterval);
-        o2DynamicInterval = null;
+        o2DynamicInterval = null; 
     }
-    startO2LogicLoop();
-
-    await glitchEffect(300); // Visual confirmation for reset
-    appendToLog("[SYS] SHIP STATE RESET TO FACTORY DEFAULTS.");
-    appendToLog("[SYS] REBOOT COMPLETE. CRITICAL FAILURES ACTIVE.");
+    // 2. Reset the flag that prevents the O2 start message from logging repeatedly.
+    o2RecoveryStarted = false;
+    // *** END: FIX FOR O2 LOOP RESTART ***
+    
+    // This uses the Firebase .set() method to overwrite the entire 'shipState' node
+    await db.ref(CENTRAL_SHIP_PATH).set(DEFAULT_SHIP_STATE)
+        .then(() => {
+            appendToLog("// RESET COMPLETE. ShipState node successfully wiped and restored.");
+            // The Firebase listener will pick this up and update the local shipData copy
+            // and trigger updateDashboard() on all connected clients.
+        })
+        .catch((error) => {
+            appendToLog(`// CRITICAL ERROR: FAILED TO RESET SHIPSTATE. Firebase Write Error: ${error.message}`);
+        });
 }
+
 
 /**
  * Enables/Disables all navigation buttons and command input, applying mobile restrictions.
@@ -548,45 +588,16 @@ function setConsoleAccess(enabled) {
     }
 }
 
-/**
- * Loads game data from the Realtime Database once the user is authenticated.
- * MODIFIED to load from a central, shared path.
- * @param {string} userId - The unique ID (now the username) of the current user (only used for logging).
- */
-function loadInitialData(userId) {
-    // MODIFIED: Reference is now a central, shared path.
-    const shipDataRef = db.ref(CENTRAL_SHIP_PATH);
-
-    shipDataRef.once('value', (snapshot) => {
-        const dbShipData = snapshot.val();
-        if (dbShipData) {
-            // Ensure the local mutable shipData object gets a fresh copy of the persisted data
-            shipData = {...dbShipData}; 
-            Object.assign(shipData, dbShipData);
-            appendToLog("[DATA] Ship status loaded from persistent log (SHARED STATE)."); // UPDATED LOG
-        } else {
-             // Initialize new ship data if none exists at the central path
-             shipDataRef.set(DEFAULT_SHIP_DATA); // Use the default constant for initialization
-             appendToLog("[DATA] Central ship data initialized in cloud log."); // UPDATED LOG
-        }
-        
-        // Start game loops and UI updates only after data is loaded
-        startO2LogicLoop();
-        gameInitialized = true;
-        updateDashboard(); 
-
-    }, (error) => {
-        appendToLog(`[ERR] Database error: ${error.message}`);
-    });
-}
+// NOTE: loadInitialData(userId) function has been REMOVED as state is now loaded globally by startSharedStateSync().
 
 /**
  * Persists the current ship data to the Realtime Database.
- * MODIFIED to save to the central, shared path.
+ * MODIFIED: Now saves to the central 'shipState' node instead of a user-specific path.
  */
 function saveShipData() {
-    if (currentUserId) { // Only allow saving if a user is logged in
-        // MODIFIED: Saves to the central path
+    // Only save if the game has been fully initialized
+    if (gameInitialized) { 
+        // Write to the central shared path
         db.ref(CENTRAL_SHIP_PATH).set(shipData)
           .catch(error => appendToLog(`[ERR] Failed to save ship data: ${error.message}`));
     }
@@ -594,7 +605,6 @@ function saveShipData() {
 
 /**
  * Updates the UI and internal state based on the current user ID.
- * This replaces the functionality of auth.onAuthStateChanged.
  * @param {string|null} userId - The current user's ID (username), or null if logged out.
  */
 function updateAuthState(userId) {
@@ -611,21 +621,19 @@ function updateAuthState(userId) {
         
         setConsoleAccess(true); // Enable Nav buttons (with mobile restrictions)
         
-        if (!gameInitialized) {
-            loadInitialData(userId); 
-            
-            // Set the initial screen based on device type (NEW LOGIC)
-            const startScreen = isMobileDevice() ? 'personnel' : 'dashboard'; 
-            switchScreen(startScreen); 
-        }
+        // OLD: loadInitialData(userId) call removed. State is handled globally by startSharedStateSync.
+        
+        // Set the initial screen based on device type (NEW LOGIC)
+        const startScreen = isMobileDevice() ? 'personnel' : 'dashboard'; 
+        switchScreen(startScreen); 
         
     } else {
         // User is signed out. SHOW LOGIN SCREEN.
         if(loginScreen) loginScreen.style.display = 'flex';
         if(consoleContainer) consoleContainer.classList.add('locked');
         currentUserId = null;
-        gameInitialized = false; // Reset game state on full logout
-        
+        // gameInitialized = false; // Keep gameInitialized true so the shared O2 loop keeps running
+
         setConsoleAccess(false); // Disable Nav buttons (except dashboard for help)
         
         // Clear the terminal and prompt the user 
@@ -720,7 +728,7 @@ async function logoutUser() {
     appendToLog(`[AUTH] Session ended.`);
 }
 
-// --- ASYNC REPAIR LOGIC FUNCTIONS (CLEANED UP IMAGE LOGIC) ---
+// --- ASYNC REPAIR LOGIC FUNCTIONS (MODIFIED) ---
 
 async function applyEngineFixLogic() {
     if (shipData.engine.status.includes("FAILURE")) {
@@ -732,14 +740,14 @@ async function applyEngineFixLogic() {
         
         shipData.engine.status = "ONLINE / STANDBY";
         
-        // REMOVED: Redundant image setting. It will now be handled by updateDashboard().
+        // *** IMAGE LOGIC REMOVED - MOVED TO updateDashboard() ***
         
         appendToLog("[ENGINE] ARRAY ONLINE. STABILITY 99.8%.");
-        saveShipData(); // Save state
+        saveShipData(); // Save state (This will trigger startSharedStateSync on other clients)
     } else {
         appendToLog("[ENGINE] STATUS IS NOMINAL. NO REPAIR NEEDED.");
     }
-    updateDashboard();
+    updateDashboard(); // Updates local dashboard and engineering tab
 }
 
 async function applyHullFixLogic() {
@@ -751,14 +759,14 @@ async function applyHullFixLogic() {
         
         shipData.hull.status = "NOMINAL (SEALED)";
         
-        // REMOVED: Redundant image setting. It will now be handled by updateDashboard().
-
+        // *** IMAGE LOGIC REMOVED - MOVED TO updateDashboard() ***
+        
         appendToLog("[HULL] BREACH SEALED. INTEGRITY 100%.");
-        saveShipData(); // Save state
+        saveShipData(); // Save state (This will trigger startSharedStateSync on other clients)
     } else {
         appendToLog("[HULL] STATUS IS NOMINAL. NO REPAIR NEEDED.");
     }
-    updateDashboard();
+    updateDashboard(); // Updates local dashboard and engineering tab
 }
 
 // --- O2, DASHBOARD, NAV, PERSONNEL LOGIC ---
@@ -793,7 +801,6 @@ function startO2LogicLoop() {
         if(shipData.o2.level < 0) {
             shipData.o2.level = 0;
             clearInterval(o2DynamicInterval);
-            o2DynamicInterval = null; // Set to null so it can be restarted by resetGameData()
             alert("CRITICAL FAILURE: LIFE SUPPORT OFFLINE.");
             saveShipData(); // Save on game over
         }
@@ -804,15 +811,20 @@ function startO2LogicLoop() {
         }
         
         updateDashboard();
+
+        // NEW: Periodically save O2 level to the shared state (every 5 seconds)
+        if (Math.floor(Date.now() / 1000) % 5 === 0) {
+             saveShipData();
+        }
+
     }, 1000);
 }
 
-// MODIFIED: Added logic to update engineering images based on shipData.
 function updateDashboard() {
     // Clock
     document.getElementById('time').textContent = new Date().toLocaleTimeString();
     
-    // --- HULL DASHBOARD CARD ---
+    // --- HULL DASHBOARD ICON ---
     const hullCard = document.getElementById('hullIconCard');
     hullCard.classList.remove('critical', 'nominal');
     if (shipData.hull.status.includes("BREACH")) {
@@ -823,8 +835,24 @@ function updateDashboard() {
         document.getElementById('hullIconCard').querySelector('.icon-symbol').innerHTML = '&#9937;'; 
     }
     document.getElementById('hullStatus').textContent = shipData.hull.status;
-
-    // --- ENGINE DASHBOARD CARD ---
+    
+    // *** NEW LOGIC FOR HULL IMAGE IN ENGINEERING TAB ***
+    const hullImage = document.getElementById('hullStatusImage');
+    const hullDisplay = document.getElementById('hull-status-display');
+    if (hullImage) {
+        if (shipData.hull.status.includes("BREACH")) {
+            // Broken state
+            hullImage.src = "shipimage1.gif"; // Assuming "shipimage1.gif" is the broken state image
+            hullImage.style.borderColor = "red"; 
+        } else {
+            // Fixed state
+            hullImage.src = "shipimage2.png";
+            hullImage.style.borderColor = "var(--primary-color)"; 
+        }
+    }
+    if (hullDisplay) hullDisplay.textContent = shipData.hull.status; 
+    
+    // --- ENGINE DASHBOARD ICON ---
     const engineCard = document.getElementById('engineIconCard');
     engineCard.classList.remove('critical', 'nominal');
     if (shipData.engine.status.includes("FAILURE")) {
@@ -835,8 +863,24 @@ function updateDashboard() {
         document.getElementById('engineIconCard').querySelector('.icon-symbol').innerHTML = '&#9881;'; 
     }
     document.getElementById('engineStatus').textContent = shipData.engine.status;
+    
+    // *** NEW LOGIC FOR ENGINE IMAGE IN ENGINEERING TAB ***
+    const engineImage = document.getElementById('engineStatusImage');
+    const engDisplay = document.getElementById('eng-status-display');
+    if (engineImage) {
+        if (shipData.engine.status.includes("FAILURE")) {
+            // Broken state
+            engineImage.src = "shipenginesdamaged.gif"; // Assuming "shipengines.png" is the broken state image
+            engineImage.style.borderColor = "red"; 
+        } else {
+            // Fixed state
+            engineImage.src = "shipenginesfixed.png";
+            engineImage.style.borderColor = "var(--primary-color)"; 
+        }
+    }
+    if (engDisplay) engDisplay.textContent = shipData.engine.status; 
 
-    // --- COMMS DASHBOARD CARD ---
+    // --- COMMS ---
     const commsCard = document.getElementById('commsIconCard');
     commsCard.classList.remove('warning', 'nominal');
     if (shipData.comms.status.includes("OFFLINE")) {
@@ -848,7 +892,7 @@ function updateDashboard() {
     }
     document.getElementById('commsStatus').textContent = shipData.comms.status;
 
-    // --- COORDS DASHBOARD CARD ---
+    // --- COORDS ---
     const coordCard = document.getElementById('coordIconCard');
     coordCard.classList.remove('warning', 'nominal');
     if (shipData.coords.status.includes("CORRUPTED")) { 
@@ -876,44 +920,7 @@ function updateDashboard() {
     else if(shipData.o2.level < 50) gauge.style.background = "orange";
     else gauge.style.background = "var(--primary-color)";
     
-    // =========================================================
-    // === NEW LOGIC: ENGINEERING TAB IMAGE STATUS UPDATE ===
-    // =========================================================
-    const hullImage = document.getElementById('hullStatusImage');
-    const engineImage = document.getElementById('engineStatusImage');
-    const hullDisplay = document.getElementById('hull-status-display');
-    const engDisplay = document.getElementById('eng-status-display');
-
-    // 1. Hull Image Logic
-    if (shipData.hull.status.includes("BREACH")) {
-        if (hullImage) {
-            hullImage.src = "shipimage1.gif";
-            hullImage.style.borderColor = "var(--alert-color)";
-        }
-    } else if (shipData.hull.status.includes("NOMINAL")) {
-        if (hullImage) {
-            hullImage.src = "shipimage2.png";
-            hullImage.style.borderColor = "var(--primary-color)";
-        }
-    }
-    
-    // 2. Engine Image Logic
-    if (shipData.engine.status.includes("FAILURE")) {
-        if (engineImage) {
-            engineImage.src = "shipenginesdamaged.gif";
-            engineImage.style.borderColor = "var(--alert-color)";
-        }
-    } else if (shipData.engine.status.includes("ONLINE")) {
-        if (engineImage) {
-            engineImage.src = "shipenginesfixed.png";
-            engineImage.style.borderColor = "var(--primary-color)";
-        }
-    }
-    
-    // 3. Update Engineering text displays (re-running this to ensure consistency)
-    if (hullDisplay) hullDisplay.textContent = shipData.hull.status; 
-    if (engDisplay) engDisplay.textContent = shipData.engine.status; 
-    // =========================================================
+    // --- REMOVED: NEW ENGINEERING POWER DISPLAY --- 
 }
 
 function displaySectorScan() {
@@ -1068,6 +1075,9 @@ window.onload = function() {
 
     // 1. START the Authentication Listener FIRST.
     setupAuthListener(); 
+
+    // 1.5. Start shared state synchronization immediately
+    startSharedStateSync(); // <--- NEW CALL
 
     // 2. Run non-dynamic, non-looping initial UI updates
     displayCrewList();
