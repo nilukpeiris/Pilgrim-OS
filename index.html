@@ -9,7 +9,24 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-    <script defer src="script.js"></script>
+
+    
+<script type="module">
+  // FIX: Import the class as a NAMED export, and use the correct name (GoogleGenAI).
+  import { GoogleGenAI } from 'https://esm.sh/@google/genai'; 
+  
+  // Expose it to the window using the exact name your script.js expects
+  window.GoogleGenerativeAI = GoogleGenAI; 
+
+  // IMPORTANT: This ensures initGeminiChat() runs AFTER the main script (script.js) has loaded.
+  window.addEventListener('load', () => {
+    if (window.initGeminiChat) {
+      window.initGeminiChat();
+    }
+  });
+</script>
+
+<script defer src="script.js"></script>
 
 </head>
 <body>

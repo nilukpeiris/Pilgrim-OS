@@ -871,3 +871,47 @@ body.glitch-transition {
     padding: 0;
     white-space: pre-wrap; /* Ensures the multiline transmission text is preserved */
 }
+
+/* --- COMMS CHAT STYLES --- */
+
+#commsLogContainer {
+    /* Enable scrolling for the chat history */
+    overflow-y: auto; 
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    padding-bottom: 20px;
+}
+
+#commsLog {
+    /* Reset default pre tag styles for chat flow */
+    white-space: pre-wrap; 
+    font-family: 'Space Mono', monospace;
+    margin: 0;
+}
+
+.chat-msg {
+    margin-bottom: 12px;
+    padding: 8px;
+    border-left: 2px solid transparent;
+    animation: fadeIn 0.3s ease-in;
+}
+
+/* User Message Style */
+.chat-msg.user {
+    color: var(--warning-color); /* Yellow */
+    border-left-color: var(--warning-color);
+    background: rgba(255, 204, 0, 0.05);
+}
+
+/* AI Message Style */
+.chat-msg.ai {
+    color: var(--primary-color); /* Cyan */
+    border-left-color: var(--primary-color);
+    background: rgba(0, 240, 255, 0.05);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
