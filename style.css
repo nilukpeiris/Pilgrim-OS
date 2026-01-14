@@ -1214,3 +1214,62 @@ body.glitch-transition {
         repeating-radial-gradient(rgba(255, 51, 51, 0.1) 0, transparent 1px 10px, rgba(255, 51, 51, 0.1) 11px) !important;
 }
 
+/* Engine Status Visual specific styling */
+#engineStatusCard .ship-visual-container {
+    height: 250px; /* Matches the size of the topology box */
+    background: rgba(0, 20, 30, 0.5);
+    border: 1px solid var(--primary-color);
+    margin-top: 10px;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#engine-status-image {
+    max-width: 90%;
+    max-height: 90%;
+    object-fit: contain;
+    filter: drop-shadow(0 0 10px var(--primary-color));
+}
+
+.video-placeholder {
+    height: 140px; /* Set your desired maximum height here */
+    width: 100%;   /* Fill the width of the column */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #000; /* Black bars if image ratio doesn't match */
+    border: 1px solid rgba(0, 240, 255, 0.2);
+    overflow: hidden;
+    position: relative;
+}
+
+.video-placeholder::after {
+    content: "";
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    /* Noise texture using a radial gradient */
+    background-image: repeating-radial-gradient(
+        #ffffff 0 0.0001%, 
+        #000000 0 0.0002%
+    );
+    background-size: 4px 4px;
+    opacity: 0.15; /* Adjust this for more or less "static" */
+    pointer-events: none; /* Allows you to still click things underneath */
+    z-index: 2;
+    animation: static-flicker 0.2s infinite;
+}
+
+@keyframes static-flicker {
+    0% { transform: translate(0, 0); }
+    25% { transform: translate(-1%, -1%); }
+    50% { transform: translate(1%, 1%); }
+    75% { transform: translate(-1%, 1%); }
+    100% { transform: translate(0, 0); }
+}
+
