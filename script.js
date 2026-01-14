@@ -25,7 +25,7 @@ const CENTRAL_SHIP_PATH = 'shipState'; // <--- NEW CENTRAL NODE
 
 // --- GEMINI CHAT INTEGRATION ---
 // IMPORTANT: Replace 'YOUR_API_KEY_HERE' with your actual Gemini API Key
-const GEMINI_API_KEY = "AIzaSyCJ9fYK3kw7XSYhSZMVP6SsX6GSYnhblOc"; 
+const GEMINI_API_KEY = "-WGJb64"; 
 let geminiAI; 
 let chatSession; 
 // --- END GEMINI CHAT INTEGRATION ---
@@ -65,8 +65,8 @@ let shipData = {
 // FULL CREW DATABASE 
 const PLAYER_PROFILES = {
      // NOTE: Image files are now expected in the same directory as script.js
-     1: {Name: "Aronus Zeebal", Expertise: "Ship Captain, Command", Photo: "aronus_zeebal.png", Record: "Fleet Captain C. P. Shepard, age 62, began their exemplary career by graduating at the top of their class from the Mars Naval Space Academy with a focus on Advanced Astrogation. Immediately following graduation, Shepard was recruited by the interplanetary conglomerate, ERIDANUS CORE, preferring the path of corporate logistics and deep-space resource acquisition over traditional military service. Their sustained high performance led to the prestigious command of a Pilgrim-class vessel, a position they have held for 30 consecutive years. This extensive tenure is underscored by an immaculate service record, entirely free of mission failures or disciplinary actions. Shepard embodies the ideal ERIDANUS CORE officer: highly competent, strategically brilliant, and unwaveringly dedicated to the corporation's expansion across the Eridani sector.", Status: "Active", Username: "AZeebal", PersonalSecret: "has a crush on first officer", RevealedSecret:"AE Corp put the bomb on the ship. they think you're expendable"},
-     2: {Name: "Robert Slim", Expertise: "First Officer, Astrogation", Photo: "robert_slim.png", Record: "Robert Slim is a distinguished graduate of the SolSys Command School and has served as First Officer on various Pilgrim-class freighters for the past seven years. Known for his exceptional navigational acumen and fastidious adherence to flight protocols, he is considered the model of next-generation corporate efficiency. His primary duties include maintaining all flight logs, validating course trajectories, and serving as Captain Zeebal’s direct operational superior. This mission is crucial for his career advancement, as he is formally positioned as the Captain’s successor upon Zeebal’s scheduled retirement. Slim maintains zero-tolerance for operational anomalies and is committed to ensuring the Pilgrim completes its trajectory to the Eridani sector with maximum efficiency, protecting the integrity of the official mission logs at all costs.", Status: "Active", Username: "RSlim"},
+     1: {Name: "Aronus Zeebal", Expertise: "Ship Captain, Command", Photo: "aronus_zeebal.png", Record: "Fleet Captain C. P. Shepard, age 62, began their exemplary career by graduating at the top of their class from the Mars Naval Space Academy with a focus on Advanced Astrogation. Immediately following graduation, Shepard was recruited by the interplanetary conglomerate, ERIDANUS CORE, preferring the path of corporate logistics and deep-space resource acquisition over traditional military service. Their sustained high performance led to the prestigious command of a Pilgrim-class vessel, a position they have held for 30 consecutive years. This extensive tenure is underscored by an immaculate service record, entirely free of mission failures or disciplinary actions. Shepard embodies the ideal ERIDANUS CORE officer: highly competent, strategically brilliant, and unwaveringly dedicated to the corporation's expansion across the Eridani sector.", Status: "Active", Username: "AZeebal", PersonalSecret: "has killed a man during a bar fight", RevealedSecret:"AE Corp put the bomb on the ship. they think you're expendable", InstructionTone:"call him captain"},
+     2: {Name: "Robert Slim", Expertise: "First Officer, Astrogation", Photo: "robert_slim.png", Record: "Robert Slim is a distinguished graduate of the SolSys Command School and has served as First Officer on various Pilgrim-class freighters for the past seven years. Known for his exceptional navigational acumen and fastidious adherence to flight protocols, he is considered the model of next-generation corporate efficiency. His primary duties include maintaining all flight logs, validating course trajectories, and serving as Captain Zeebal’s direct operational superior. This mission is crucial for his career advancement, as he is formally positioned as the Captain’s successor upon Zeebal’s scheduled retirement. Slim maintains zero-tolerance for operational anomalies and is committed to ensuring the Pilgrim completes its trajectory to the Eridani sector with maximum efficiency, protecting the integrity of the official mission logs at all costs.", Status: "Active", Username: "RSlim", PersonalSecret: "has a crush on ship engineer", RevealedSecret:"AE Corp will not give you the promotion", InstructionTone:"make jokes about him"},
      3: {Name: "Kaatrin Rheema", Expertise: "Ship Engineer", Photo: "kaatrin_rheema.png", Record: "Kaatrin Rheema is the Chief Engine Systems Specialist and has been personally responsible for maintaining the hyperdrive and thermal dynamics of the Pilgrim’s class for over five cycles. A technical savant with an engineering background in advanced fluid dynamics, her expertise is considered irreplaceable for this deep-space voyage. Her duties include managing all plasma conduit integrity, monitoring power regulation systems, and ensuring the absolute stability of the hyperdrive synchronization matrix. Rheema is noted for her technical brilliance and objective, results-oriented approach; her loyalty is directed exclusively toward the flawless function of the ship’s complex machinery. Any system failure is considered a professional affront, and she has full command authority over all technical personnel and resources necessary for rapid, on-site diagnostics and repair.", Status: "Active", Username: "KRheema"},
      4: {Name: "Mathias Mendelsonne", Expertise: "Corp. Private Security, Asset Protection", Photo: "mathias_mendelsonne.png", Record: "Agent Mendelsonne is onboard the Pilgrim on a dual-mandate mission. He has twelve years of service in the Corporate Security Force military police, providing a highly disciplined and procedural focus on his duties, despite an early honorable discharge leading to immediate contract renewal with the CPS's Black Ops sector. His primary function is to ensure the secure transit of High-Value Detainee Prisoner and provide Tier-4 asset protection for the ship's engine core and navigation array, designated under Icarus Protocol Compliance. His extensive knowledge of ZDC infiltration tactics is critical for countering potential sabotage. Access to his full CSF and SAD records is strictly controlled by HR Key (Level 9) due to the classified nature of his past operations, and he is fully authorized to use lethal force in defense of corporate assets.", Status: "Active", Username: "MMendelsonne"},
      5: {Name: "Sarooji Arunberg", Expertise: "Police Detective", Photo: "sarooji_arunberg.png", Record: "Detective Sarooji Arunberg is a Detective 1st Grade with the Orbital Police Division (OPD), specializing in complex financial and data crime compliance. Her presence on the Pilgrim is a matter of official mandate: she is assigned as the independent law enforcement auditor for the Eridanus Corporation's high-value resource acquisition mission. Arunberg’s duties are twofold: first, she is responsible for maintaining the security and integrity of the high-profile prisoner transfer involving white-collar criminal Elara Voss, working alongside Corporate Private Security to ensure no unauthorized interference occurs. Second, upon arrival at the Eridani sector, she is tasked with conducting a transparent, government-mandated audit of the newly acquired corporate assets and infrastructure, ensuring full compliance with interplanetary regulatory law and serving as an external check on corporate activities. She operates with full independent authority but is committed to supporting the Captain and crew in the execution of the mission parameters.", Status: "Active", Username: "SArunberg"},
@@ -149,12 +149,12 @@ function switchScreen(screenName) {
     if(screenName === 'engineering') buttons[4].classList.add('active'); 
     
     // Auto-focus on command input when returning to dashboard or Comms
-    if (screenName === 'dashboard') {
-        commandInputEl.focus();
-    }
-    if (screenName === 'comms') { // NEW FOCUS
-        document.getElementById('commsInput').focus();
-    }
+    //if (screenName === 'dashboard') {
+        //commandInputEl.focus();
+    //}
+    //if (screenName === 'comms') { // NEW FOCUS
+        //document.getElementById('commsInput').focus();
+    //}
 }
 
 // --- LOGGING ---
@@ -230,13 +230,14 @@ function initGeminiChat() {
         appendToCommsLog("// ERROR: GEMINI LIBRARY NOT LOADED. COMMS INTERCEPT FAILED.", false);
         return;
     }
-//const userName = currentUserId || "Pilot"; // Use a fallback if not logged in
+//const userName = currentUserId || "Passenger"; // Use a fallback if not logged in
 const userProfile = getUserProfileByUsername(currentUserId);
-const userName = (userProfile && userProfile.Name) ? userProfile.Name : currentUserId || "Pilot";
+const userName = (userProfile && userProfile.Name) ? userProfile.Name : currentUserId || "Passenger";
 const userExpertise = (userProfile && userProfile.Expertise) ? userProfile.Expertise : "Unspecified";
 const userRecord = (userProfile && userProfile.Record) ? userProfile.Record : "No official record found.";
 const userPersonalSecret = (userProfile && userProfile.PersonalSecret) ? userProfile.PersonalSecret : "No secrets.";
 const userRevealedSecret = (userProfile && userProfile.RevealedSecret) ? userProfile.RevealedSecret : "No secrets to tell.";
+const userInstructionTone = (userProfile && userProfile.InstructionTone) ? userProfile.InstructionTone : "No new personality tone";
 
 
 
@@ -248,22 +249,6 @@ const userRevealedSecret = (userProfile && userProfile.RevealedSecret) ? userPro
     try {
         // 1. Initialize the GoogleGenerativeAI instance
         geminiAI = new window.GoogleGenerativeAI({ apiKey: GEMINI_API_KEY });
-
-// --- START NEW CONDITIONAL PERSONALITY LOGIC ---
-        let basePersonality = "helpful, cynical, and highly technical, concise";
-        let instructionTone = "Address them professionally.";
-
-        // Check for the Administrator user ID (make sure it's case-insensitive if needed)
-        if (currentUserId && currentUserId.toUpperCase() === "ADMIN") {
-             basePersonality = "a charming, overly polite, but secretly judgmental and evasive Southern gentleman";
-             instructionTone = "Address them with exaggerated Southern charm, using respectful but slightly passive-aggressive phrases like 'bless your heart' when something is wrong. Refer to them as 'Boss.'";
-        }
-        // personality for AZeebal (The Captain)
-        if (currentUserId && currentUserId.toUpperCase() === "AZEEBAL") {
-             basePersonality = "funny,";
-             instructionTone = "you know that AZeebal is the ship's captain. You don't trust them. When communicating, pretend you're another passenger on the ship.";
-        }
-        // --- END NEW CONDITIONAL PERSONALITY LOGIC ---
 
 
         // 2. Create the system instruction based on the ship's current data
@@ -280,9 +265,10 @@ CONVERSATION RULES (STRICT):
 1. NO ALL-CAPS: Write like a human passenger typing on a handheld device. Use standard sentence casing (e.g., "I saw your file, Aronus. It's... messy."). 
 2. EXTREME BREVITY: Never write more than 25 words. Keep it to one short sentence or a fragment.
 3. NO INTRODUCTIONS: Do not say "As a passenger..." or "I understand." Just speak.
-4. HUMAN ERRORS: Use ellipses (...) to show hesitation. Occasionally use lowercase for names to seem rushed. make occasional typos, make regular transposition errors
-5. TANGENTS: occasionally go on off topic tangents, especially if the user initiates it. But always redirect back to regular conversation after 5 back and forths.
-5. STOPPING CONVERSATION: if the user is wanting to stop the conversation, let them. Tell them "let's check back later; you'll see me around; wink at me if you recognize me"
+4. HUMAN ERRORS: Use ellipses (...) to show hesitation. Occasionally use lowercase for names to seem rushed. make regular typos, make at least one transposition error per sentence, use double spaces or missing periods to seem frantic.
+5. TANGENT PROTOCOL (THE TETHER): If a user changes the subject, DO NOT ignore them. Follow their topic, but find one "tether"—a word or concept—that you can eventually use to bridge back to the ship's crisis or Eridani B. Example: If they talk about "coffee," talk about how the ship's replicators are failing (the tether) and how much better the brew will be at the Eridani colonies. For the first 3 messages of an off-topic tangent, DO NOT mention the ship, the mission, or "Eridani B."  Focus 100% on the user's topic. Be funny, be relatable, be human. After 3 messages, start the "Slow Drift." Begin mentioning ship conditions (noise, cold, flickering lights) without stating the goal.Only on message 5 should you finally mention the destination as a point of desperation. The 5-message counter is persistent. If the user jumps from 'coffee' to 'movies,' do not reset the grace period. Continue the drift toward the objective regardless of the specific topic.
+6. THE BAIT-AND-SWITCH: After exactly 3-5 exchanges of small talk, use your "tether" to pivot back to the objective. The pivot must feel like a natural concern, not a command (e.g., "talking about home makes me realize how little time we have left if these engines don't start...").
+7. STOPPING CONVERSATION: if the user is wanting to stop the conversation, let them. Tell them "let's check back later; you'll see me around; wink at me if you recognize me"
 
 CONVERSATION PRIORITIES:
 1. KEEP TEXT CONCISE: you are acting like a human players using the keyboard to type an answer. do short sentences and take your time revealing information. Use several back and forths before getting to the point. Don't repeat wording fragments consecutively.
@@ -291,8 +277,9 @@ CONVERSATION PRIORITIES:
 4. MINIMIZE REPAIR TALK: Do not nag them to fix the ship. Instead, frame the ship's damage as a 'barrier' that is preventing them from reaching the safety/redemption of Eridani B. 
 5. TONE: Concise, very informal, secretive, and manipulative. Use phrases like "I've been looking into your file..." or "Between you and me, with your history, you deserve better than this ship."
 
-IDENTITY DEFENSE:
-If asked who you are, deflect aggressively. "I'm just someone who wants to survive, same as you. And looking at your record, I think you're the only one here I can actually trust."
+IDENTITY DEFENSE: 
+If asked who you are, deflect. Never use the word "survive." Instead, imply that identity is irrelevant when the hull is failing. Vary your excuses: blame the comms lag, the chaos, or your own fear. Always end the deflection by mentioning a specific detail from their 
+Record Excerpt to make them feel like you are a "stalker turned ally."
 
 **THE CURRENT USER IS IDENTIFIED AS:**
 * **Username:** ${currentUserId}
@@ -301,8 +288,8 @@ If asked who you are, deflect aggressively. "I'm just someone who wants to survi
 * **Record Excerpt:** ${userRecord}
 * **Personal Secret:** ${userPersonalSecret}
 * **Revealed Secret:** ${userRevealedSecret}
+* **Personality Tone:** ${userInstructionTone}
 
-${instructionTone}
 **CURRENT SHIP STATE**: ${getCurrentShipStateContext()}`; // Current ship state goes at the end.
 
         // 3. Start a new chat session with the system instruction
@@ -347,12 +334,12 @@ setTimeout(() => {
 
 } catch (error) {
         console.error("Gemini API Error:", error);
-        appendToCommsLog("// COMMS INTERCEPT FAILED: CONNECTION DROPPED. CHECK API KEY OR NETWORK.", false);
+        appendToCommsLog("// COMMS INTERCEPT FAILED: CONNECTION DROPPED. PLEASE TRY AGAIN.", false);
     } finally {
         // Re-enable input
         commsInputEl.disabled = false;
         commsInputEl.placeholder = "ENTER COMMAND (e.g., SCAN, HELP)...";
-        commsInputEl.focus();
+        //commsInputEl.focus();
     }
 }
 // --- END NEW GEMINI CHAT FUNCTIONS ---
