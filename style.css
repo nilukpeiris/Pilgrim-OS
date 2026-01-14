@@ -972,3 +972,245 @@ body.glitch-transition {
     80% { clip-path: inset(40% 0 40% 0); }
     100% { clip-path: inset(80% 0 0 0); }
 }
+
+/* --- TACTICAL GRID SYSTEM --- */
+.tactical-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: 1fr 1fr;
+    gap: 15px;
+    height: 100%;
+}
+
+.tactical-panel {
+    margin-bottom: 0 !important;
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    position: relative;
+}
+
+.video-placeholder {
+    flex-grow: 1;
+    background: #000;
+    border: 1px solid rgba(0, 240, 255, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    color: var(--primary-color);
+    font-size: 0.7rem;
+}
+
+.rec-dot {
+    width: 6px;
+    height: 6px;
+    background: var(--alert-color);
+    border-radius: 50%;
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    animation: blink 1s infinite;
+}
+
+.radar-container {
+    height: 100px;
+    width: 100px;
+    margin: auto;
+    border-radius: 50%;
+    border: 1px solid var(--primary-color);
+    position: relative;
+    background: radial-gradient(circle, #0a141e 0%, #050a10 100%);
+}
+
+.radar-sweep {
+    position: absolute;
+    width: 50%;
+    height: 50%;
+    border-right: 1px solid var(--primary-color);
+    border-top-right-radius: 100%;
+    transform-origin: bottom left;
+    bottom: 50%;
+    left: 50%;
+    animation: sweep 4s linear infinite;
+    background: linear-gradient(45deg, transparent 50%, rgba(0, 240, 255, 0.1) 100%);
+}
+
+.indicator-list { list-style: none; padding: 0; margin-top: 10px; }
+.indicator-list li { margin-bottom: 8px; font-size: 0.7rem; display: flex; align-items: center; }
+
+.status-led {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+.status-led.nominal { background: #00ff88; box-shadow: 0 0 5px #00ff88; }
+.status-led.warning { background: var(--warning-color); box-shadow: 0 0 5px var(--warning-color); }
+.status-led.critical { background: var(--alert-color); box-shadow: 0 0 5px var(--alert-color); }
+
+@keyframes sweep { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+
+/* --- ADVANCED RADAR SYSTEM --- */
+:root {
+    --radar-sweep-color: #0ff;
+    --radar-dots: #001A1A;
+    --radar-lines: #003333;
+    --radar-bg: #000101;
+    --radar-speed: 6s; /* Slightly faster for action */
+}
+
+.radar-wrapper {
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0px;
+}
+
+#radar-custom {
+    width: 120px; /* Scaled down for the panel */
+    aspect-ratio: 1;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(to bottom, #f1f1f1, #9d9e9f);
+    box-shadow: inset 0 -2px 5px rgba(0,0,0,0.25), 0 5px 10px rgba(0,0,0,0.5);
+    border-radius: 50%;
+    z-index: 2;
+}
+
+#radar-custom::before, #radar-custom::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 92%;
+    aspect-ratio: 1;
+    border-radius: 50%;
+}
+
+#radar-custom::before {
+    z-index: -1;
+    background-color: var(--radar-bg);
+    background-image:
+        linear-gradient(to bottom, transparent 50%, rgba(0, 51, 51, 0.3) 50.5%, transparent 51%),
+        linear-gradient(to right, transparent 50%, rgba(0, 51, 51, 0.3) 50.5%, transparent 51%),
+        repeating-radial-gradient(rgba(0, 51, 51, 0.3) 0, transparent 1px 15px, rgba(0, 51, 51, 0.3) 16px);
+}
+
+#radar-custom::after {
+    background-image: conic-gradient(#000 90deg, var(--radar-sweep-color) 360deg);
+    mix-blend-mode: color-dodge;
+    animation: rotate-radar var(--radar-speed) linear infinite;
+}
+
+#targets-custom {
+    width: 90%;
+    height: 90%;
+    position: relative;
+    border-radius: 50%;
+    overflow: hidden;
+    background:
+        radial-gradient(circle at 65% 15%, var(--radar-dots), transparent 4px),
+        radial-gradient(circle at 20% 40%, var(--radar-dots), transparent 5px),
+        radial-gradient(circle at 55% 70%, var(--radar-dots), transparent 6px),
+        radial-gradient(circle at 80% 30%, var(--radar-dots), transparent 3px);
+    animation: move-targets 60s infinite linear;
+}
+
+@keyframes rotate-radar {
+    from { transform: translate(-50%, -50%) rotate(0deg); }
+    to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+@keyframes move-targets {
+    from { background-position: 0 0; }
+    to { background-position: 0 120px; }
+}
+
+.ship-diagram-container {
+    flex-grow: 1;
+    width: 100%;
+    height: 150px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #000000;
+    border: 1px solid rgba(0, 240, 255, 0.2);
+    box-shadow: inset 0 0 10px rgba(0, 240, 255, 0.05);
+    border-radius: 4px;
+    padding: 10px;
+    box-sizing: border-box;
+    overflow: hidden; /* Ensures nothing spills out */
+}
+
+#ship-status-image {
+    max-height: 140px;
+    width: auto;
+    flex-shrink: 0;
+    filter: none;
+    object-fit: contain;
+}
+
+/* Container for side-by-side layout */
+.dual-radar-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+    flex-grow: 1;
+    gap: 5px;
+}
+
+/* Base Radar Scaling for Dual View */
+#radar-custom {
+    width: 80px; /* Reduced size to fit two side-by-side */
+    aspect-ratio: 1;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(to bottom, #f1f1f1, #9d9e9f);
+    box-shadow: inset 0 -1px 3px rgba(0,0,0,0.25), 0 3px 6px rgba(0,0,0,0.5);
+    border-radius: 50%;
+    z-index: 2;
+}
+
+/* --- CYAN RADAR (LEFT) --- */
+.radar-cyan::after {
+    background-image: conic-gradient(#000 90deg, #0ff 360deg);
+    mix-blend-mode: color-dodge;
+    animation: rotate-radar 6s linear infinite;
+}
+
+/* --- RED RADAR (RIGHT) --- */
+.radar-red::after {
+    background-image: conic-gradient(#000 90deg, #ff3333 360deg); /* Red Sweep */
+    mix-blend-mode: color-dodge;
+    animation: rotate-radar 4s linear infinite; /* Slightly faster for a 'hostile' feel */
+}
+
+/* Red Targets Styling */
+.targets-red {
+    background:
+        radial-gradient(circle at 30% 20%, #330000, transparent 4px),
+        radial-gradient(circle at 70% 60%, #330000, transparent 5px),
+        radial-gradient(circle at 40% 80%, #330000, transparent 6px) !important;
+}
+
+/* Adjust the background grid color for the red radar */
+.radar-red::before {
+    background-color: #1a0000 !important; /* Dark red background */
+    background-image:
+        linear-gradient(to bottom, transparent 50%, rgba(255, 51, 51, 0.1) 50.5%, transparent 51%),
+        linear-gradient(to right, transparent 50%, rgba(255, 51, 51, 0.1) 50.5%, transparent 51%),
+        repeating-radial-gradient(rgba(255, 51, 51, 0.1) 0, transparent 1px 10px, rgba(255, 51, 51, 0.1) 11px) !important;
+}
+

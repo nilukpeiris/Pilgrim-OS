@@ -25,7 +25,7 @@ const CENTRAL_SHIP_PATH = 'shipState'; // <--- NEW CENTRAL NODE
 
 // --- GEMINI CHAT INTEGRATION ---
 // IMPORTANT: Replace 'YOUR_API_KEY_HERE' with your actual Gemini API Key
-const GEMINI_API_KEY = "-WGJb64"; 
+const GEMINI_API_KEY = ""; 
 let geminiAI; 
 let chatSession; 
 // --- END GEMINI CHAT INTEGRATION ---
@@ -947,33 +947,35 @@ function updateDashboard() {
     // Clock
     document.getElementById('time').textContent = new Date().toLocaleTimeString();
     
-    // --- HULL DASHBOARD ICON ---
+    // --- HULL DASHBOARD ICON & DYNAMIC IMAGE ---
     const hullCard = document.getElementById('hullIconCard');
+    const hullImage = document.getElementById('ship-status-image'); // Match the ID from your HTML
+    const hullLed = document.getElementById('led-hull'); // Match the ID from your indicator list
+
     hullCard.classList.remove('critical', 'nominal');
+    
     if (shipData.hull.status.includes("BREACH")) {
+        // DAMAGED STATE
         hullCard.classList.add('critical');
         document.getElementById('hullIconCard').querySelector('.icon-symbol').innerHTML = '&#9876;'; 
+        
+        if (hullImage) hullImage.src = 'shipimage1.gif';
+        if (hullLed) {
+            hullLed.classList.remove('nominal');
+            hullLed.classList.add('critical');
+        }
     } else {
+        // FIXED STATE
         hullCard.classList.add('nominal');
         document.getElementById('hullIconCard').querySelector('.icon-symbol').innerHTML = '&#9937;'; 
-    }
-    document.getElementById('hullStatus').textContent = shipData.hull.status;
-    
-    // *** NEW LOGIC FOR HULL IMAGE IN ENGINEERING TAB ***
-    const hullImage = document.getElementById('hullStatusImage');
-    const hullDisplay = document.getElementById('hull-status-display');
-    if (hullImage) {
-        if (shipData.hull.status.includes("BREACH")) {
-            // Broken state
-            hullImage.src = "shipimage1.gif"; // Assuming "shipimage1.gif" is the broken state image
-            hullImage.style.borderColor = "red"; 
-        } else {
-            // Fixed state
-            hullImage.src = "shipimage2.png";
-            hullImage.style.borderColor = "var(--primary-color)"; 
+        
+        if (hullImage) hullImage.src = 'shipimage2.png';
+        if (hullLed) {
+            hullLed.classList.remove('critical');
+            hullLed.classList.add('nominal');
         }
     }
-    if (hullDisplay) hullDisplay.textContent = shipData.hull.status; 
+    document.getElementById('hullStatus').textContent = shipData.hull.status;
     
     // --- ENGINE DASHBOARD ICON ---
     const engineCard = document.getElementById('engineIconCard');

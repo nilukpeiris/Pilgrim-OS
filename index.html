@@ -179,30 +179,68 @@
                 </div>
             </div>
 
-            <div id="screen-engineering" class="screen">
-                <h2>MAIN ENGINEERING // DIAGNOSTICS</h2>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; height: 100%;">
-                    
-                    <div class="engineering-column">
-                        <div class="status-card">
-                            <h3>PLASMA CONDUITS (AUX)</h3>
-                            <img id="engineStatusImage" 
-                                 src="shipenginesdamaged.gif" 
-                                 alt="Damaged Engine Schematic" 
-                                 style="max-width: 100%; height: auto; display: block; margin-top: 10px; border: 1px dashed var(--alert-color);">
-                        </div>
-                        <p style="font-size: 0.8rem; opacity: 0.7; text-align: center;">Engine Array Status: <span id="eng-status-display">CRITICAL FAILURE</span>. Repair codes must be obtained and entered via the System Status terminal.</p>
-                    </div>
+            <div id="screen-engineering" class="screen full-height-flex">
+    <h2>// TACTICAL OVERLAY: BRIDGE VIEW</h2>
+    
+    <div class="tactical-grid">
+	<div class="status-card tactical-panel">
+            <h3>[ BIOTIC SENSORS ]</h3>
+            <pre style="font-size: 0.6rem; color: var(--primary-color); line-height: 1.5; margin: 0;">
+CRYOPOD 01-05: STABLE
+CRYOPOD 06-10: UNSTABLE
+CRYOPOD 11-12: BREACHED
+            </pre>
+        </div>
 
-                    <div class="engineering-column">
-                        <div class="status-card" id="hull-diagram-container">
-                            <h3>FORE SECTION DIAGRAM</h3>
-                            <img id="hullStatusImage" src="shipimage1.gif" alt="Hull Breach Diagram">
-                        </div>
-                        <p style="font-size: 0.8rem; opacity: 0.7; text-align: center;">Hull Breach Status: <span id="hull-status-display">SEAL BREACH - FORE SECTION</span>. Seal codes must be obtained and entered via the System Status terminal.</p>
-                    </div>
-                </div>
+        <div class="status-card tactical-panel">
+    <h3>[ SCANNER: DUAL PHASE ]</h3>
+    	<div class="dual-radar-container">
+        <div class="radar-wrapper">
+            <div id="radar-custom" class="radar-cyan">
+                <div id="targets-custom"></div>
             </div>
+        </div>
+        <div class="radar-wrapper">
+            <div id="radar-custom" class="radar-red">
+                <div id="targets-custom" class="targets-red"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+        <div class="status-card tactical-panel">
+            <h3>[ FEED 01: CARGO BAY ]</h3>
+            <div class="video-placeholder static-effect">
+                <div class="scanline"></div>
+                <span class="rec-dot"></span> ENCRYPTED
+            </div>
+        </div>
+    
+    	<div class="status-card tactical-panel">
+    		<h3>[ SYSTEM TOPOLOGY ]</h3>
+    
+    	<div class="ship-diagram-container">
+        <div class="scanline"></div> <img id="ship-status-image" src="shipimage1.gif" alt="Ship Status">
+    </div>
+</div>
+
+        <div class="status-card tactical-panel">
+            <h3>[ POWER LOAD ]</h3>
+            <div class="gauge-container"><div class="gauge-fill" style="width: 85%; background: var(--primary-color);"></div></div>
+            <p style="font-size: 0.7rem; margin-top: 10px;">CORE OUTPUT: 8.4 GW</p>
+        </div>
+
+	<div class="status-card tactical-panel">
+            <h3>[ FEED 02: ENGINE ROOM ]</h3>
+            <div class="video-placeholder">
+                <div class="scanline"></div>
+                <span class="rec-dot"></span> NO SIGNAL
+            </div>
+        </div>
+
+        
+    </div>
+</div>
 
 <div id="screen-comms" class="screen full-height-flex comms-grid">
     <h2>// COMMS ARRAY: SIGNAL INTERCEPT</h2>
@@ -225,7 +263,7 @@
     <button class="nav-btn glitch" data-text="NavCore" onclick="switchScreen('nav')">NavCore</button>
     <button class="nav-btn glitch" data-text="Personnel" onclick="switchScreen('personnel')">Personnel</button>
     <button class="nav-btn glitch" data-text="Comms" onclick="switchScreen('comms')">Comms</button>
-    <button class="nav-btn glitch" data-text="Engineering" onclick="switchScreen('engineering')">Engineering</button>
+    <button class="nav-btn glitch" data-text="Tactical" onclick="switchScreen('engineering')">Tactical</button>
 </nav>
     </div> <div id="vertical-scanline"></div>
 
