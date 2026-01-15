@@ -1310,3 +1310,69 @@ body.glitch-transition {
     filter: none;
     object-fit: contain;
 }
+
+/* Circular Indicator Styles */
+.outer_circle, .outer_circle_bars_l, .outer_circle_bars_r, 
+.inner_progress_circle, .inner_half_circle, .center_inner_circle_second,
+.center_inner_circle_3_dashed_verticle {
+    fill: transparent;
+    stroke: var(--primary-color);
+}
+
+.outer_circle { stroke-width: 2; stroke-dasharray: 7 1; }
+.outer_circle_bars_l { stroke-width: 7; stroke-dasharray: 0.4 7.6; stroke-dashoffset: 0.1; }
+.outer_circle_bars_r { stroke-width: 7; stroke-dasharray: 0.4 7.6; stroke-dashoffset: 1.4; }
+.inner_progress_circle { stroke-width: 7; stroke-dasharray: 7 1; }
+.inner_half_circle { stroke-width: 7; stroke-dasharray: 24.5 0.5; }
+
+.center_outer_circle, .center_inner_circle_3, .center_inner_circle_3_dashed, 
+.center_inner_circle_2, .center_inner_circle_1, .center_inner_circle_0 {
+    fill: transparent;
+    stroke: var(--primary-color);
+    opacity: 0.4; /* Slightly dimmed for depth */
+}
+
+.center_inner_circle_second {
+    stroke-width: 2;
+    stroke-dasharray: 5 95;
+    animation: centerInnerCircleSecond 20s linear infinite steps(4, end);
+}
+
+.center_inner_circle_0 {
+    stroke-width: 7;
+    stroke-dasharray: 0.3 0.7;
+    animation: centerInnerCircle0 40s linear infinite;
+}
+
+.small_rectangles { fill: var(--primary-color); opacity: 0.8; }
+
+@keyframes centerInnerCircleSecond {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+@keyframes centerInnerCircle0 {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.power-load-container {
+    flex-grow: 1;
+    width: 100%;
+    height: 150px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-image: url('o2statusbackground.png');
+    background-size: 100% auto;
+    background-position: center;
+    background-repeat: no-repeat;
+    //background: #000000;
+    border: 1px solid rgba(0, 240, 255, 0.2);
+    box-shadow: inset 0 0 10px rgba(0, 240, 255, 0.05);
+    border-radius: 4px;
+    padding: 10px;
+    box-sizing: border-box;
+    overflow: hidden;
+
+}

@@ -25,7 +25,7 @@ const CENTRAL_SHIP_PATH = 'shipState'; // <--- NEW CENTRAL NODE
 
 // --- GEMINI CHAT INTEGRATION ---
 // IMPORTANT: Replace 'YOUR_API_KEY_HERE' with your actual Gemini API Key
-const GEMINI_API_KEY = "api key"; 
+const GEMINI_API_KEY = "AIzaSyA18MCHmlPpPAjdqZOBh-bYHKvBBxLMZgE"; 
 let geminiAI; 
 let chatSession; 
 // --- END GEMINI CHAT INTEGRATION ---
@@ -1042,8 +1042,8 @@ if (shipData.engine.status === "ONLINE / STANDBY") {
     if(shipData.o2.level < 20) gauge.style.background = "red";
     else if(shipData.o2.level < 50) gauge.style.background = "orange";
     else gauge.style.background = "var(--primary-color)";
+    updateO2Visuals(shipData.o2.level);
     
-    // --- REMOVED: NEW ENGINEERING POWER DISPLAY --- 
 }
 
 function displaySectorScan() {
@@ -1259,4 +1259,26 @@ function startGlitchLoop() {
         }, glitchDuration);
         
     }, randomInterval);
+}
+
+
+/**
+ * NEW: Updates the circular O2 progress indicator
+ * @param {number} o2Value - The current O2 level (0-100)
+ */
+function updateO2Visuals(o2Value) {
+    // 1. Update the numerical percentage inside the circle
+    const counterElement = document.getElementById("o2PercentageCounter");
+    if (counterElement) {
+        counterElement.textContent = `${Math.floor(o2Value)}%`;
+    }
+
+    // 2. Update the SVG ring mask
+    // Since pathLength="100" is set in the HTML, the offset 
+    // is simply (100 - current percentage).
+    const ring = document.getElementById("o2ProgressRing");
+    if (ring) {
+        const offset = 100 - o2Value;
+        ring.setAttribute("stroke-dashoffset", offset);
+    }
 }
