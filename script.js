@@ -25,7 +25,7 @@ const CENTRAL_SHIP_PATH = 'shipState'; // <--- NEW CENTRAL NODE
 
 // --- GEMINI CHAT INTEGRATION ---
 // IMPORTANT: Replace 'YOUR_API_KEY_HERE' with your actual Gemini API Key
-const GEMINI_API_KEY = ""; 
+const GEMINI_API_KEY = "AIzaSyDxl6hv8ZoNYfZ8amTmUIr81V52-WGJb64"; 
 let geminiAI; 
 let chatSession; 
 // --- END GEMINI CHAT INTEGRATION ---
@@ -947,7 +947,8 @@ function updateDashboard() {
     // Clock
     document.getElementById('time').textContent = new Date().toLocaleTimeString();
     
-    // --- HULL DASHBOARD ICON & DYNAMIC IMAGE ---
+    
+// --- HULL DASHBOARD ICON & DYNAMIC IMAGE ---
     const hullCard = document.getElementById('hullIconCard');
     const hullImage = document.getElementById('ship-status-image'); // Match the ID from your HTML
     const hullLed = document.getElementById('led-hull'); // Match the ID from your indicator list

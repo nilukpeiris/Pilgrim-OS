@@ -1015,8 +1015,8 @@ body.glitch-transition {
 }
 
 .radar-container {
-    height: 100px;
-    width: 100px;
+    height: 200px;
+    width: 200px;
     margin: auto;
     border-radius: 50%;
     border: 1px solid var(--primary-color);
@@ -1065,15 +1065,15 @@ body.glitch-transition {
 }
 
 .radar-wrapper {
-    flex-grow: 1;
+    background: transparent; 
+    flex: 1;
     display: flex;
-    align-items: center;
     justify-content: center;
-    padding: 0px;
+    align-items: center;
 }
 
 #radar-custom {
-    width: 120px; /* Scaled down for the panel */
+    width: 200px; /* Scaled down for the panel */
     aspect-ratio: 1;
     position: relative;
     display: flex;
@@ -1161,12 +1161,18 @@ body.glitch-transition {
 
 /* Container for side-by-side layout */
 .dual-radar-container {
+    width: 100%;
+    height: 100%;
+    /* Set the background image */
+    background-image: url('radarpanel.png');
+    background-size: 100% auto;
+    background-position: calc(50% + 2px) calc(50% - 5px);
+    background-repeat: no-repeat;
     display: flex;
-    flex-direction: row;
     justify-content: space-around;
     align-items: center;
-    flex-grow: 1;
-    gap: 5px;
+    position: relative; /* Useful if you want to absolute position targets later */
+    overflow: hidden;
 }
 
 /* Base Radar Scaling for Dual View */
@@ -1272,4 +1278,5 @@ body.glitch-transition {
     75% { transform: translate(-1%, 1%); }
     100% { transform: translate(0, 0); }
 }
+
 
