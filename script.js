@@ -25,7 +25,7 @@ const CENTRAL_SHIP_PATH = 'shipState'; // <--- NEW CENTRAL NODE
 
 // --- GEMINI CHAT INTEGRATION ---
 // IMPORTANT: Replace 'YOUR_API_KEY_HERE' with your actual Gemini API Key
-const GEMINI_API_KEY = "AIzaSyCMhYrGsMGzNJtGU5_mpf-kJ3yy24KeiuA"; 
+const GEMINI_API_KEY = "api key"; 
 let geminiAI; 
 let chatSession; 
 // --- END GEMINI CHAT INTEGRATION ---
@@ -947,6 +947,17 @@ function updateDashboard() {
     // Clock
     document.getElementById('time').textContent = new Date().toLocaleTimeString();
     
+// --- ENGINE DYNAMIC IMAGE ---
+const engineImage = document.getElementById('engines-status-image');
+const engineDetail = document.getElementById('engineStatusDetail');
+
+if (shipData.engine.status === "ONLINE / STANDBY") {
+    if (engineImage) engineImage.src = 'enginesfixed.png'; // Image when repaired
+    if (engineDetail) engineDetail.style.color = 'var(--primary-color)';
+} else {
+    if (engineImage) engineImage.src = 'enginesdamaged.gif'; // Image when broken
+    if (engineDetail) engineDetail.style.color = 'var(--alert-color)';
+}
     
 // --- HULL DASHBOARD ICON & DYNAMIC IMAGE ---
     const hullCard = document.getElementById('hullIconCard');
@@ -990,21 +1001,7 @@ function updateDashboard() {
     }
     document.getElementById('engineStatus').textContent = shipData.engine.status;
     
-    // *** NEW LOGIC FOR ENGINE IMAGE IN ENGINEERING TAB ***
-    const engineImage = document.getElementById('engineStatusImage');
-    const engDisplay = document.getElementById('eng-status-display');
-    if (engineImage) {
-        if (shipData.engine.status.includes("FAILURE")) {
-            // Broken state
-            engineImage.src = "shipenginesdamaged.gif"; // Assuming "shipengines.png" is the broken state image
-            engineImage.style.borderColor = "red"; 
-        } else {
-            // Fixed state
-            engineImage.src = "shipenginesfixed.png";
-            engineImage.style.borderColor = "var(--primary-color)"; 
-        }
-    }
-    if (engDisplay) engDisplay.textContent = shipData.engine.status; 
+
 
     // --- COMMS ---
     const commsCard = document.getElementById('commsIconCard');
