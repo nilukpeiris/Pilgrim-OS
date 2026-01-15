@@ -25,7 +25,7 @@ const CENTRAL_SHIP_PATH = 'shipState'; // <--- NEW CENTRAL NODE
 
 // --- GEMINI CHAT INTEGRATION ---
 // IMPORTANT: Replace 'YOUR_API_KEY_HERE' with your actual Gemini API Key
-const GEMINI_API_KEY = "AIzaSyDxl6hv8ZoNYfZ8amTmUIr81V52-WGJb64"; 
+const GEMINI_API_KEY = "AIzaSyCMhYrGsMGzNJtGU5_mpf-kJ3yy24KeiuA"; 
 let geminiAI; 
 let chatSession; 
 // --- END GEMINI CHAT INTEGRATION ---
