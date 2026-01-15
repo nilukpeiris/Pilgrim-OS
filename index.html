@@ -5,7 +5,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Aetherium Dynamics // Pilgrim Ship Console OS v1.2</title>
-    <script src="https://unpkg.com/@ungap/structured-clone"></script>
+
+    <script>
+    // Robust Chrome 93 Compatibility Patch
+    if (!window.structuredClone) {
+        window.structuredClone = function(obj) {
+            if (obj === undefined) return undefined;
+            try {
+                return JSON.parse(JSON.stringify(obj));
+            } catch (e) {
+                console.error("StructuredClone Fallback Failed:", e);
+                return obj; // Return original if parsing fails
+            }
+        };
+    }
+</script>
+
+
     <link rel="stylesheet" href="style.css">
 
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -226,15 +242,15 @@
 </div>
 
         <div class="status-card tactical-panel">
-            <h3>[ POWER LOAD ]</h3>
+            <h3>[ LIFE SUPPORT ]</h3>
             <div class="power-load-container">
-    <div id="o2PercentageCounter" style="position: absolute; top: 52%; left 50%; transform: translate (-50%, -50%); color: var(--primary-color); font-family: 'Space Mono', monospace; font-size: 1.2em;">0%</div>
+        <div id="o2PercentageCounter" style="position: absolute; top: 58%; left: 50%; transform: translate(-50%, -50%); color: var(--primary-color); font-family: 'Space Mono', monospace; font-size: 1.1em; text-align: center; width: 100%;">--:--</div>
 
-    <svg width="140px" height="140px" viewBox="-100 -100 200 200">
-        <mask id="progress-mask">
-            <rect x="-100" y="-100" width="200" height="200" fill="#000" />
-            <circle id="o2ProgressRing" r="96" fill="none" stroke="#fff" stroke-width="7" stroke-dasharray="100 100" stroke-dashoffset="100" pathLength="100" />
-        </mask>
+        <svg width="140px" height="140px" viewBox="-100 -100 200 200">
+            <mask id="progress-mask">
+                <rect x="-100" y="-100" width="200" height="200" fill="#000" />
+                <circle id="o2ProgressRing" r="96" fill="none" stroke="#fff" stroke-width="7" stroke-dasharray="100 100" stroke-dashoffset="100" pathLength="100" />
+            </mask>
 
         <circle class="outer_circle" cx="0" cy="0" r="99" pathLength="64" />
         <circle class="outer_circle_bars_l" cx="0" cy="0" r="96" pathLength="64" />

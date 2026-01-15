@@ -1263,19 +1263,37 @@ function startGlitchLoop() {
 
 
 /**
- * NEW: Updates the circular O2 progress indicator
+ * UPDATED: Updates the circular O2 progress indicator with a time countdown
  * @param {number} o2Value - The current O2 level (0-100)
  */
 function updateO2Visuals(o2Value) {
-    // 1. Update the numerical percentage inside the circle
-    const counterElement = document.getElementById("o2PercentageCounter");
-    if (counterElement) {
-        counterElement.textContent = `${Math.floor(o2Value)}%`;
+    // 1. Calculate Time Remaining based on current ship status
+    let rate = 0;
+    const engineFixed = shipData.engine.status.includes("ONLINE");
+    const hullFixed = shipData.hull.status.includes("NOMINAL");
+
+    if (engineFixed && hullFixed) {
+        rate = 0; // O2 is increasing/stable
+    } else if (engineFixed || hullFixed) {
+        rate = O2_DECAY_RATE_WARNING;  // 0.02% per second
+    } else {
+        rate = O2_DECAY_RATE_CRITICAL; // 0.04% per second
     }
 
-    // 2. Update the SVG ring mask
-    // Since pathLength="100" is set in the HTML, the offset 
-    // is simply (100 - current percentage).
+    const counterElement = document.getElementById("o2PercentageCounter");
+    if (counterElement) {
+        if (rate === 0) {
+            counterElement.textContent = "STABLE";
+        } else {
+            // Formula: (Current % / Decay Rate per second) = total seconds left
+            const totalSecondsLeft = o2Value / rate;
+            const mins = Math.floor(totalSecondsLeft / 60);
+            const secs = Math.floor(totalSecondsLeft % 60);
+            counterElement.textContent = `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+    }
+
+    // 2. Update the SVG ring mask (keep this the same for the visual bar)
     const ring = document.getElementById("o2ProgressRing");
     if (ring) {
         const offset = 100 - o2Value;
