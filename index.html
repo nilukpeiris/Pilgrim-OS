@@ -125,15 +125,22 @@
                 <div id="nav-main-grid">
                     
                     <div class="nav-left-column">
-                        <div class="status-card">
-                            <h3>SECTOR MAPPING DATA</h3>
-                            <pre id="navScanOutput"></pre>
-                        </div>
-                    </div>
+    <div class="status-card">
+        <h3>SECTOR MAPPING DATA</h3>
+        <pre id="navScanOutput"></pre>
+    </div>
+
+    <div class="status-card tactical-panel" id="nav-instructions-box" style="margin-top: 20px;">
+        <h3>[ SYSTEM RESET GUIDANCE ]</h3>
+        <div class="instruction-content">
+            <p>To restore flight systems, you must resolve scrambled sector scan data and bypass the <strong>[CORRUPTED]</strong> signals in the navigation grid. Cross-reference the <strong>Sector Mapping Data</strong> with your salvaged <strong>Defrag Clues</strong> to triangulate the ship's true position in space. Once the spatial logic is synthesized, input the sector content data into the <strong>Coordinate Logic System</strong>. Successive attempts will stabilize the sensors and reveal additional defrag clues. </p>
+        </div>
+    </div>
+    </div>
                     
                     <div class="nav-right-column">
                         <div class="status-card">
-                            <h3>DEFRAG CLUES (Target Coordinates)</h3>
+                            <h3>DEFRAG CLUES </h3>
                             <ul id="navClues"></ul>
                         </div>
 
@@ -229,7 +236,7 @@
         <div class="status-card tactical-panel">
             <h3>[ FEED 01: CARGO BAY ]</h3>
             <div class="video-placeholder">
-    		<div class="rec-dot"></div> <img src="Cargobay.png" alt="Security Feed" style="width: 100%; height: 100%; object-fit: cover;">
+    		<div class="rec-dot"></div> <img src="Cargobay.gif" alt="Security Feed" style="width: 100%; height: 100%; object-fit: cover;">
 </div>
         </div>
     
@@ -281,7 +288,7 @@
 	<div class="status-card tactical-panel">
             <h3>[ FEED 02: ENGINE ROOM ]</h3>
             <div class="video-placeholder">
-    		<div class="rec-dot"></div> <img src="EngineRoom.png" alt="Security Feed" style="width: 100%; height: 100%; object-fit: cover;">
+    		<div class="rec-dot"></div> <img src="EngineRoom.gif" alt="Security Feed" style="width: 100%; height: 100%; object-fit: cover;">
 </div>
         </div>
 
@@ -306,11 +313,11 @@
 </div>
             </div> 
 <nav id="nav-bar">
-    <button class="nav-btn glitch active" data-text="Status" onclick="switchScreen('dashboard')">Status</button>
-    <button class="nav-btn glitch" data-text="NavCore" onclick="switchScreen('nav')">NavCore</button>
-    <button class="nav-btn glitch" data-text="Personnel" onclick="switchScreen('personnel')">Personnel</button>
-    <button class="nav-btn glitch" data-text="Comms" onclick="switchScreen('comms')">Comms</button>
-    <button class="nav-btn glitch" data-text="Tactical" onclick="switchScreen('engineering')">Tactical</button>
+    <button class="nav-btn glitch active" data-text="Status" onclick="switchScreen('dashboard')">STATUS</button>
+    <button class="nav-btn glitch" data-text="NavCore" onclick="switchScreen('nav')">NavCORE</button>
+    <button class="nav-btn glitch" data-text="Personnel" onclick="switchScreen('personnel')">PERSONNEL</button>
+    <button class="nav-btn glitch" data-text="Comms" onclick="switchScreen('comms')">COMMS</button>
+    <button class="nav-btn glitch" data-text="Tactical" onclick="switchScreen('engineering')">TACTICAL</button>
 </nav>
     </div> <div id="vertical-scanline"></div>
 

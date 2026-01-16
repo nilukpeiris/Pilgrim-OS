@@ -25,7 +25,7 @@ const CENTRAL_SHIP_PATH = 'shipState'; // <--- NEW CENTRAL NODE
 
 // --- GEMINI CHAT INTEGRATION ---
 // IMPORTANT: Replace 'YOUR_API_KEY_HERE' with your actual Gemini API Key
-const GEMINI_API_KEY = "AIzaSyA18MCHmlPpPAjdqZOBh-bYHKvBBxLMZgE"; 
+const GEMINI_API_KEY = ""; 
 let geminiAI; 
 let chatSession; 
 // --- END GEMINI CHAT INTEGRATION ---
@@ -65,7 +65,7 @@ let shipData = {
 // FULL CREW DATABASE 
 const PLAYER_PROFILES = {
      // NOTE: Image files are now expected in the same directory as script.js
-     1: {Name: "Aronus Zeebal", Expertise: "Ship Captain, Command", Photo: "aronus_zeebal.png", Record: "Fleet Captain C. P. Shepard, age 62, began their exemplary career by graduating at the top of their class from the Mars Naval Space Academy with a focus on Advanced Astrogation. Immediately following graduation, Shepard was recruited by the interplanetary conglomerate, ERIDANUS CORE, preferring the path of corporate logistics and deep-space resource acquisition over traditional military service. Their sustained high performance led to the prestigious command of a Pilgrim-class vessel, a position they have held for 30 consecutive years. This extensive tenure is underscored by an immaculate service record, entirely free of mission failures or disciplinary actions. Shepard embodies the ideal ERIDANUS CORE officer: highly competent, strategically brilliant, and unwaveringly dedicated to the corporation's expansion across the Eridani sector.", Status: "Active", Username: "AZeebal", PersonalSecret: "has killed a man during a bar fight", RevealedSecret:"AE Corp put the bomb on the ship. they think you're expendable", InstructionTone:"call him captain"},
+     1: {Name: "Aronus Zeebal", Expertise: "Ship Captain, Command", Photo: "aronus_zeebal.png", Record: "Captain Aronus Zeebal, began their exemplary career by graduating at the top of their class from the Mars Naval Space Academy with a focus on Advanced Astrogation. Immediately following graduation, Zeebal was recruited by the interplanetary conglomerate, AETHERIUM DYNAMICS, preferring the path of corporate logistics and deep-space resource acquisition over traditional military service. Their sustained high performance led to the prestigious command of a Pilgrim-class vessel, a position they have held for 25 consecutive years. This extensive tenure is underscored by an immaculate service record, entirely free of mission failures or disciplinary actions. Zeebal embodies the ideal AETHERIUM DYNAMICS officer: highly competent, strategically brilliant, and unwaveringly dedicated to the corporation's expansion across the Eridani sector.", Status: "Active", Username: "AZeebal", PersonalSecret: "has killed a man during a bar fight", RevealedSecret:"AE Corp put the bomb on the ship. they think you're expendable", InstructionTone:"call him captain"},
      2: {Name: "Robert Slim", Expertise: "First Officer, Astrogation", Photo: "robert_slim.png", Record: "Robert Slim is a distinguished graduate of the SolSys Command School and has served as First Officer on various Pilgrim-class freighters for the past seven years. Known for his exceptional navigational acumen and fastidious adherence to flight protocols, he is considered the model of next-generation corporate efficiency. His primary duties include maintaining all flight logs, validating course trajectories, and serving as Captain Zeebal’s direct operational superior. This mission is crucial for his career advancement, as he is formally positioned as the Captain’s successor upon Zeebal’s scheduled retirement. Slim maintains zero-tolerance for operational anomalies and is committed to ensuring the Pilgrim completes its trajectory to the Eridani sector with maximum efficiency, protecting the integrity of the official mission logs at all costs.", Status: "Active", Username: "RSlim", PersonalSecret: "has a crush on ship engineer", RevealedSecret:"AE Corp will not give you the promotion", InstructionTone:"make jokes about him"},
      3: {Name: "Kaatrin Rheema", Expertise: "Ship Engineer", Photo: "kaatrin_rheema.png", Record: "Kaatrin Rheema is the Chief Engine Systems Specialist and has been personally responsible for maintaining the hyperdrive and thermal dynamics of the Pilgrim’s class for over five cycles. A technical savant with an engineering background in advanced fluid dynamics, her expertise is considered irreplaceable for this deep-space voyage. Her duties include managing all plasma conduit integrity, monitoring power regulation systems, and ensuring the absolute stability of the hyperdrive synchronization matrix. Rheema is noted for her technical brilliance and objective, results-oriented approach; her loyalty is directed exclusively toward the flawless function of the ship’s complex machinery. Any system failure is considered a professional affront, and she has full command authority over all technical personnel and resources necessary for rapid, on-site diagnostics and repair.", Status: "Active", Username: "KRheema"},
      4: {Name: "Mathias Mendelsonne", Expertise: "Corp. Private Security, Asset Protection", Photo: "mathias_mendelsonne.png", Record: "Agent Mendelsonne is onboard the Pilgrim on a dual-mandate mission. He has twelve years of service in the Corporate Security Force military police, providing a highly disciplined and procedural focus on his duties, despite an early honorable discharge leading to immediate contract renewal with the CPS's Black Ops sector. His primary function is to ensure the secure transit of High-Value Detainee Prisoner and provide Tier-4 asset protection for the ship's engine core and navigation array, designated under Icarus Protocol Compliance. His extensive knowledge of ZDC infiltration tactics is critical for countering potential sabotage. Access to his full CSF and SAD records is strictly controlled by HR Key (Level 9) due to the classified nature of his past operations, and he is fully authorized to use lethal force in defense of corporate assets.", Status: "Active", Username: "MMendelsonne"},
@@ -204,7 +204,7 @@ function appendToCommsLog(text, isCommand = false) {
 }
 
 function clearCommsLog() {
-    if (commsLogEl) commsLogEl.innerText = '// COMMS LOG CLEARED.';
+    if (commsLogEl) commsLogEl.innerText = '// COMMS LOG CLEARED. TYPE "HELP" FOR COMMANDS';
 }
 
 // --- NEW FUNCTION TO GET DYNAMIC RTD CONTEXT ---
@@ -737,7 +737,7 @@ function updateAuthState(userId) {
         if(loginScreen) loginScreen.style.display = 'none';
         if(consoleContainer) consoleContainer.classList.remove('locked');
         currentUserId = userId;
-        appendToLog(`[AUTH] Welcome, Pilot ${userId}. System access granted.`);
+        appendToLog(`[AUTH] Welcome, ${userId}. System access granted. TYPE 'HELP' FOR ASSISTANCE.`);
         
         setConsoleAccess(true); // Enable Nav buttons (with mobile restrictions)
         
