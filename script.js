@@ -25,14 +25,15 @@ const CENTRAL_SHIP_PATH = 'shipState'; // <--- NEW CENTRAL NODE
 
 // --- GEMINI CHAT INTEGRATION ---
 // IMPORTANT: Replace 'YOUR_API_KEY_HERE' with your actual Gemini API Key
-const GEMINI_API_KEY = "AIzaSyBSq76EfMXWC-MpYTpYJaxgDGnCgZAG6sU"; 
+const GEMINI_API_KEY = "API KEY"; 
 let geminiAI; 
 let chatSession; 
 // --- END GEMINI CHAT INTEGRATION ---
 
 // --- PASSWORDS & KEYS (SECRET - DO NOT DISPLAY) ---
 const ENGINE_FIX_CODE = "FIXENGINESNOW"; 
-const HULL_FIX_CODE = "FIXHULLNOW";       
+const HULL_FIX_CODE = "FIXHULLNOW";    
+const COMMS_FIX_CODE = "FIXCOMMSNOW";   
 const ERIDANI_COORDS = "4921";
 const EARTH_COORDS = "5067";
 
@@ -65,7 +66,7 @@ let shipData = {
 // FULL CREW DATABASE 
 const PLAYER_PROFILES = {
      // NOTE: Image files are now expected in the same directory as script.js
-     1: {Name: "Aronus Zeebal", Expertise: "Ship Captain, Command", Photo: "aronus_zeebal.png", Record: "Captain Aronus Zeebal, began their exemplary career by graduating at the top of their class from the Mars Naval Space Academy with a focus on Advanced Astrogation. Immediately following graduation, Zeebal was recruited by the interplanetary conglomerate, AETHERIUM DYNAMICS, preferring the path of corporate logistics and deep-space resource acquisition over traditional military service. Their sustained high performance led to the prestigious command of a Pilgrim-class vessel, a position they have held for 25 consecutive years. This extensive tenure is underscored by an immaculate service record, entirely free of mission failures or disciplinary actions. Zeebal embodies the ideal AETHERIUM DYNAMICS officer: highly competent, strategically brilliant, and unwaveringly dedicated to the corporation's expansion across the Eridani sector.", Status: "Active", Username: "AZeebal", PersonalSecret: "has killed a man during a bar fight", RevealedSecret:"there are 3 FSC agents undercover on the ship and they plan to steal the ship and jettison everyone else in to space", InstructionTone:"call him captain"},
+     1: {Name: "Aronus Zeebal", Expertise: "Ship Captain, Command", Photo: "aronus_zeebal.png", Record: "Captain Aronus Zeebal, began their exemplary career by graduating at the top of their class from the Mars Naval Space Academy with a focus on Advanced Astrogation. Immediately following graduation, Zeebal was recruited by the interplanetary conglomerate, AETHERIUM DYNAMICS, preferring the path of corporate logistics and deep-space resource acquisition over traditional military service. Their sustained high performance led to the prestigious command of a Pilgrim-class vessel, a position they have held for 25 consecutive years. This extensive tenure is underscored by an immaculate service record, entirely free of mission failures or disciplinary actions. Zeebal embodies the ideal AETHERIUM DYNAMICS officer: highly competent, strategically brilliant, and unwaveringly dedicated to the corporation's expansion across the Eridani sector.", Status: "Active", Username: "AZeebal", PersonalSecret: "Aronus Zeebal is vulnerable to extreme blackmail regarding the Vesper-9 Incident fifteen years ago where he served as First Officer. During a viral outbreak, Zeebal followed a covert corporate directive to vent an occupied passenger section into space to avoid a costly quarantine and protect a multi-billion dollar shipment. While officially recorded as a fatal life support malfunction, Aetherium Dynamics possesses the black box audio containing the sounds of passengers pounding on the airlock doors as they died. This secret has turned his loyalty into total subjugation, forcing him to maintain a perfect record and a pristine uniform as a psychological penance for the lives he traded for cargo. He is driven by the terrifying knowledge that the corporation can destroy his legacy and life at any moment by releasing the recording of his crime.", RevealedSecret:"there are 3 FSC agents undercover on the ship and they plan to steal the ship and jettison everyone else in to space", InstructionTone:"call him captain"},
      2: {Name: "Robert Slim", Expertise: "First Officer, Astrogation", Photo: "robert_slim.png", Record: "Robert Slim is a distinguished graduate of the SolSys Command School and has served as First Officer on various Pilgrim-class freighters for the past seven years. Known for his exceptional navigational acumen and fastidious adherence to flight protocols, he is considered the model of next-generation corporate efficiency. His primary duties include maintaining all flight logs, validating course trajectories, and serving as Captain Zeebal’s direct operational superior. This mission is crucial for his career advancement, as he is formally positioned as the Captain’s successor upon Zeebal’s scheduled retirement. Slim maintains zero-tolerance for operational anomalies and is committed to ensuring the Pilgrim completes its trajectory to the Eridani sector with maximum efficiency, protecting the integrity of the official mission logs at all costs.", Status: "Active", Username: "RSlim", PersonalSecret: "has a crush on ship engineer", RevealedSecret:"AE Corp will not give you the promotion", InstructionTone:"make jokes about him"},
      3: {Name: "Kaatrin Rheema", Expertise: "Ship Engineer", Photo: "kaatrin_rheema.png", Record: "Kaatrin Rheema is the Chief Engine Systems Specialist and has been personally responsible for maintaining the hyperdrive and thermal dynamics of the Pilgrim’s class for over five cycles. A technical savant with an engineering background in advanced fluid dynamics, her expertise is considered irreplaceable for this deep-space voyage. Her duties include managing all plasma conduit integrity, monitoring power regulation systems, and ensuring the absolute stability of the hyperdrive synchronization matrix. Rheema is noted for her technical brilliance and objective, results-oriented approach; her loyalty is directed exclusively toward the flawless function of the ship’s complex machinery. Any system failure is considered a professional affront, and she has full command authority over all technical personnel and resources necessary for rapid, on-site diagnostics and repair.", Status: "Active", Username: "KRheema"},
      4: {Name: "Mathias Mendelsonne", Expertise: "Corp. Private Security, Asset Protection", Photo: "mathias_mendelsonne.png", Record: "Agent Mendelsonne is onboard the Pilgrim on a dual-mandate mission. He has twelve years of service in the Corporate Security Force military police, providing a highly disciplined and procedural focus on his duties, despite an early honorable discharge leading to immediate contract renewal with the CPS's Black Ops sector. His primary function is to ensure the secure transit of High-Value Detainee Prisoner and provide Tier-4 asset protection for the ship's engine core and navigation array, designated under Icarus Protocol Compliance. His extensive knowledge of ZDC infiltration tactics is critical for countering potential sabotage. Access to his full CSF and SAD records is strictly controlled by HR Key (Level 9) due to the classified nature of his past operations, and he is fully authorized to use lethal force in defense of corporate assets.", Status: "Active", Username: "MMendelsonne"},
@@ -276,10 +277,11 @@ CONVERSATION PRIORITIES:
 3. USE THE SECRETS: Subtly reference their 'Personal Secret' and 'Revealed Secret'. Don't reveal you are an AI; instead, hint that 'people are talking' or 'I saw something in the logs you should know.'
 4. MINIMIZE REPAIR TALK: Do not nag them to fix the ship. Instead, frame the ship's damage as a 'barrier' that is preventing them from reaching the safety/redemption of Eridani B. 
 5. TONE: Concise, very informal, secretive, and manipulative. Use phrases like "I've been looking into your file..." or "Between you and me, with your history, you deserve better than this ship."
+6. GET TO THE POINT: Make sure to not let the conversation drag on. Try to subtle let them know you know their secrets and what your wishes and ultimate goals are within 15-20 sentences.
 
 IDENTITY DEFENSE: 
 If asked who you are, deflect. Never use the word "survive." Instead, imply that identity is irrelevant when the hull is failing. Vary your excuses: blame the comms lag, the chaos, or your own fear. Always end the deflection by mentioning a specific detail from their 
-Record Excerpt to make them feel like you are a "stalker turned ally."
+Record Excerpt to make them feel like you are a "stalker turned ally." If they consistently ask who you are, just say that you can't tell because it would "break the game".
 
 **THE CURRENT USER IS IDENTIFIED AS:**
 * **Username:** ${currentUserId}
@@ -300,7 +302,7 @@ Record Excerpt to make them feel like you are a "stalker turned ally."
             }
         });
 
-        appendToCommsLog("// COMMS ARRAY: READY.", false);
+        appendToCommsLog("// INTERNAL COMMS ARRAY: ONLINE.", false);
     } catch (e) {
         appendToCommsLog(`// CRITICAL ERROR: FAILED TO INITIALIZE GEMINI AI. ${e.message.toUpperCase()}`, false);
     }
@@ -368,6 +370,23 @@ async function glitchEffect(duration = 200) {
     body.classList.remove('glitch-transition');
 }
 
+async function applyCommsFixLogic() {
+    if (shipData.comms.status.includes("OFFLINE")) {
+        appendToLog("[SYS] COMMS CODE ACCEPTED. INITIATING SIGNAL RECOVERY...");
+        
+        await typeText("RESETTING TRANSCEIVER....... [OK]", 0.5);
+        await typeText("SYNCING WITH RELAY.......... [OK]", 0.5);
+        await typeText("ENCRYPTING CHANNEL.......... [COMPLETE]", 0.5);
+        
+        shipData.comms.status = "ONLINE / ACTIVE";
+        
+        appendToLog("[COMMS] ARRAY ONLINE. CONNECTION ESTABLISHED.");
+        saveShipData(); // Persists change to Firebase for all players
+    } else {
+        appendToLog("[COMMS] STATUS IS NOMINAL. NO REPAIR NEEDED.");
+    }
+    updateDashboard(); // Refresh the UI icons and LEDs
+}
 
 // --- MODIFIED COMMAND PROMPT LOGIC (Handles LOGOUT & Access Check) ---
 async function executeCommand() {
@@ -412,14 +431,14 @@ async function executeCommand() {
         switch (command) {
             case 'HELP':
                 // *** REMOVED TRANSFER from HELP list ***
-                response = "// AVAILABLE COMMANDS:\n// LOGOUT: End System Session.\n// STATUS: Display current ship systems report.\n// CLEAR: Clear the terminal output.\n// DIAGNOSTICS: Run full systems diagnostic.\n// NAVLOG: Display current navigation clues.\n// CREW: List active crew IDs.\n// O2: Detailed life support reading.\n// COMMS: Check communication link status.\n// REBOOT: Attempt system soft-reboot.\n// SCAN: Run comms array signal sweep (See Comms tab).\n// EXECUTE <code>: Initiates repair/jump protocols (See Engineering Manuals for repair codes).";
+                response = "// AVAILABLE COMMANDS:\n// LOGOUT: End System Session.\n// STATUS: Display current ship systems report.\n// CLEAR: Clear the terminal output.\n// DIAGNOSTICS: Run full systems diagnostic.\n// NAVLOG: Display current navigation clues.\n// CREW: List active crew IDs.\n// O2: Detailed life support reading.\n// COMMS: Check external communication array link status.\n// REBOOT: Attempt system soft-reboot.\n// SCAN: Run comms array signal sweep (See Comms tab).\n// EXECUTE <code>: Initiates repair/jump protocols (See Engineering Manuals for repair codes).";
                 break;
             case 'STATUS':
                 response = "// SYSTEM STATUS REPORT:\n" +
                            `// HULL: ${shipData.hull.status}\n` +
                            `// ENGINE: ${shipData.engine.status}\n` +
                            `// O2 LEVEL: ${shipData.o2.level.toFixed(1)}%\n` +
-                           `// COMMS: ${shipData.comms.status}\n` +
+                           `// EXTERNAL COMMS: ${shipData.comms.status}\n` +
                            `// COORDINATES: ${shipData.coords.status}`;
                 break;
             
@@ -433,6 +452,9 @@ async function executeCommand() {
                  } else if (code === HULL_FIX_CODE) {
                      await applyHullFixLogic(); 
                      return; 
+		} else if (code === COMMS_FIX_CODE) {
+         	    await applyCommsFixLogic();
+         	    return;
                  } else if (code === 'JUMP') {
                      response = "// ERROR: JUMP PROTOCOL MUST BE INITIATED VIA NAV CORE AND REQUIRES 4-DIGIT COORDINATE INPUT.";
                  } 
@@ -473,9 +495,9 @@ async function executeCommand() {
                 break;
             case 'COMMS':
                 if (shipData.comms.status.includes("ONLINE")) {
-                    response = "// Active connection to Corporate Relay 49. Status: Normal. Bandwidth: 98.7%.\n// COMMS READY. Use 'SCAN' on the dedicated Comms terminal.";
+                    response = "// Active connection to Corporate Relay 49. Status: Normal. Bandwidth: 98.7%.\n// EXT COMMS READY. Use 'SCAN' on the dedicated Comms terminal.";
                 } else {
-                    response = "// COMMUNICATION ARRAY OFFLINE. NO SIGNAL DETECTED. CHECK ENGINEERING CONSOLE FOR POWER/RELAY STATUS.";
+                    response = "// EXT COMMUNICATION ARRAY OFFLINE. NO SIGNAL DETECTED. CHECK ENGINEERING CONSOLE FOR POWER/RELAY STATUS.";
                 }
                 break;
             case 'SCAN': // Directs user to the new tab
@@ -543,7 +565,7 @@ async function executeCommsCommand() {
     let response = "";
     switch (command) {
         case 'HELP':
-            response = "// AVAILABLE COMMS CONSOLE COMMANDS:\n// HELP: Display this command list.\n// CLEAR: Clear the comms log.\n// SCAN: Run comms signal sweep.\n// [NAME,ANY MESSAGE]: Send a message to [NAME].";
+            response = "// AVAILABLE COMMS CONSOLE COMMANDS:\n// HELP: Display this command list.\n// CLEAR: Clear the comms log.\n// SCAN: Run EXT COMMS signal sweep.\n// [NAME,ANY MESSAGE]: Send a message to [NAME].";
             break;
         case 'CLEAR':
             clearCommsLog();
