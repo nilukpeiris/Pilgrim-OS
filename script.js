@@ -570,6 +570,15 @@ async function executeCommsCommand() {
         case 'CLEAR':
             clearCommsLog();
             return; 
+	case 'SCAN':
+            if (shipData.comms.status.includes("ONLINE")) {
+                const scanContext = `[SYSTEM NOTIFICATION: The user has run a SCAN. You are now Captain Kaelen of the 'RSS-Aegis'. You have intercepted their signal. Respond as an external ship captain only for this exchange.]`;
+                await sendMessageToGemini(`${scanContext} USER SIGNAL: ${input}`);
+                return;
+            } else {
+                response = "// ERROR: EXTERNAL COMMS OFFLINE. SCAN FAILED.";
+            }
+            break;
         default:
             // --- FORWARD TO GEMINI AI ---
             // Check authentication before sending to a potentially resource-heavy AI
