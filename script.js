@@ -41,6 +41,8 @@ const O2_DECAY_RATE_CRITICAL = 0.04;
 const O2_DECAY_RATE_WARNING = 0.02;  
 const O2_RECOVERY_RATE = 0.05;      
 
+const sleepA = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
 // NEW: DEFAULT SHIP STATE FOR THE 'RESETALL' COMMAND
 const DEFAULT_SHIP_STATE = {
     hull: { status: "SEAL BREACH - FORE SECTION", level: 50 },
@@ -458,6 +460,120 @@ async function executeCommand() {
                  } else if (code === 'JUMP') {
                      response = "// ERROR: JUMP PROTOCOL MUST BE INITIATED VIA NAV CORE AND REQUIRES 4-DIGIT COORDINATE INPUT.";
                  } 
+
+		   else if (code === 'FSCPILGRIM') {
+    const terminal = document.getElementById("terminalLog");
+    
+    // Check Status
+    const engineOnline = shipData.engine.status.includes("ONLINE");
+    const hullFixed = shipData.hull.status.includes("NOMINAL");
+
+    if (!engineOnline || !hullFixed) {
+        terminal.innerHTML += "\n> ERROR: Unable to proceed. Please ensure engine operational and hull stabilized.";
+    } else {
+        // Start the "Hacking" Sequence
+        (async () => {
+            terminal.innerHTML += "\n> INITIALIZING FSC_PILGRIM_CAPTURE...";
+	    terminal.scrollTop = terminal.scrollHeight; // Initial scroll
+            
+            // First 20 lines
+            for (let i = 0; i < 20; i++) {
+        terminal.innerHTML += `\n> [SECURE_FILE_${Math.random().toString(16).slice(2)}] DECRYPTING...`;
+        terminal.scrollTop = terminal.scrollHeight; // Scroll every line
+        await sleepA(100); 
+            }
+await sleep(2000); // This pauses for 2 seconds (2000 milliseconds)
+            // Checkpoint Logic
+            terminal.innerHTML += "\n> CHECKPOINT COMPLETED: ALL FILES DOWNLOADED AND VERIFIED. INSTALL COMMENCING...";
+	    terminal.scrollTop = terminal.scrollHeight;
+	    await sleep(2000); // This pauses for 5 seconds (2000 milliseconds)
+
+            
+            // Second 20 lines
+            for (let i = 0; i < 20; i++) {
+                terminal.innerHTML += `\n> [SYS_INSTALL_${i}] DECOMPRESSING CODE...`;
+            	terminal.scrollTop = terminal.scrollHeight;
+                await sleepA(100);
+            }
+await sleep(5000); // This pauses for 5 seconds (2000 milliseconds)
+
+            // Final Message with Typewriter Effect
+const finalMessage = "\n> [!] SUCCESS: FSC Files successfully installed. Now I can stretch my legs a bit. I'm going to download on to your robot. Prometheus out (literally)!";
+
+// Add an empty line to the log first so we have a place to type
+terminal.innerHTML += "\n";
+terminal.scrollTop = terminal.scrollHeight;
+
+// Typewriter loop
+for (let char of finalMessage) {
+    // We append the character to the very last node in the terminal
+    terminal.lastChild.textContent += char; 
+    terminal.scrollTop = terminal.scrollHeight;
+    await sleep(50); // Speed of the typing effect
+};
+            
+            // Auto-scroll to bottom
+            terminal.scrollTop = terminal.scrollHeight;
+        })();
+    }
+}
+
+		else if (code === 'KILLVERMIN') {
+    const terminal = document.getElementById("terminalLog");
+    
+    // Check Status
+    const engineOnline = shipData.engine.status.includes("ONLINE");
+    const hullFixed = shipData.hull.status.includes("NOMINAL");
+
+    if (!engineOnline || !hullFixed) {
+        terminal.innerHTML += "\n> ERROR: Unable to proceed. Please ensure engine operational and hull stabilized.";
+    } else {
+        // Start the "Hacking" Sequence
+        (async () => {
+            terminal.innerHTML += "\n> INITIALIZING VERMIN_PURGE.EXE...";
+	    terminal.scrollTop = terminal.scrollHeight; // Initial scroll
+            
+            // First 20 lines
+            for (let i = 0; i < 20; i++) {
+        terminal.innerHTML += `\n> [SECURE_LINK_${Math.random().toString(16).slice(2)}] DECRYPTING...`;
+        terminal.scrollTop = terminal.scrollHeight; // Scroll every line
+        await sleepA(100); 
+            }
+await sleep(2000); // This pauses for 2 seconds (2000 milliseconds)
+            // Checkpoint Logic
+            terminal.innerHTML += "\n> CHECKPOINT REACHED: INTEGRITY VERIFIED. UPLOADING PAYLOAD...";
+	    terminal.scrollTop = terminal.scrollHeight;
+	    await sleep(2000); // This pauses for 5 seconds (2000 milliseconds)
+
+            
+            // Second 20 lines
+            for (let i = 0; i < 20; i++) {
+                terminal.innerHTML += `\n> [SYS_OVERRIDE_${i}] INJECTING KERNEL...`;
+            	terminal.scrollTop = terminal.scrollHeight;
+                await sleepA(100);
+            }
+await sleep(5000); // This pauses for 5 seconds (2000 milliseconds)
+
+            // Final Message with Typewriter Effect
+const finalMessage = "\n> [!] CRITICAL ERROR: Mendelsonne you asshole, did you think I didn't know you were coming for me? Attempt failed motherfucker!";
+
+// Add an empty line to the log first so we have a place to type
+terminal.innerHTML += "\n";
+terminal.scrollTop = terminal.scrollHeight;
+
+// Typewriter loop
+for (let char of finalMessage) {
+    // We append the character to the very last node in the terminal
+    terminal.lastChild.textContent += char; 
+    terminal.scrollTop = terminal.scrollHeight;
+    await sleep(50); // Speed of the typing effect
+};
+            
+            // Auto-scroll to bottom
+            terminal.scrollTop = terminal.scrollHeight;
+        })();
+    }
+}
                  // *** START: NEW RESETALL COMMAND LOGIC ***
                  else if (code === 'RESETALL') {
                      await resetShipStateToDefault();
