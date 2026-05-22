@@ -68,10 +68,10 @@ let shipData = {
 // FULL CREW DATABASE 
 const PLAYER_PROFILES = {
      // NOTE: Image files are now expected in the same directory as script.js
-	 1: {Name: "Aronyx Zeebal", Expertise: "Ship Captain", Photo: "aronyx_zeebal.gif", Record: "A thirty-year veteran of the deep-space lanes, Captain Zeebal is a name synonymous with reliability and corporate steady-handedness. Known across the sector for her 'safety-first' philosophy, Zeebal rose to prominence following her exemplary service during the high-pressure resource runs of the late 2040s. A recipient of the AD 'Bronze Star for Logistics,' she is widely regarded as a mentor to the next generation of officers. While some whisper that the Captain’s 'old school' style is a relic of a bygone era, Aetherium Dynamics remains firm in its trust of her seasoned intuition. On this voyage, Zeebal is tasked with overseeing the safe transit of high-priority corporate assets to the Eridani frontier.", Status: "Active", Username: "AZeebal", PersonalSecret: "Aronus Zeebal is vulnerable to extreme blackmail regarding the Vesper-9 Incident fifteen years ago where he served as First Officer. During a viral outbreak, Zeebal followed a covert corporate directive to vent an occupied passenger section into space to avoid a costly quarantine and protect a multi-billion dollar shipment. While officially recorded as a fatal life support malfunction, Aetherium Dynamics possesses the black box audio containing the sounds of passengers pounding on the airlock doors as they died. This secret has turned his loyalty into total subjugation, forcing him to maintain a perfect record and a pristine uniform as a psychological penance for the lives he traded for cargo. He is driven by the terrifying knowledge that the corporation can destroy his legacy and life at any moment by releasing the recording of his crime.", RevealedSecret:"there are 3 FSC agents undercover on the ship and they plan to steal the ship and jettison everyone else in to space", InstructionTone:"call him captain"},
-     2: {Name: "Robert Slim", Expertise: "First Officer", Photo: "robert_slim.gif", Record: "A graduate of the SolSys Command School with highest honors, Officer Slim represents the future of Aetherium Dynamics leadership. With a record defined by 'Flawless Compliance,' Slim is widely recognized for his precision in cockpit maneuvers and his expertise in Extra-Vehicular Activity (EVA). To the public, he is the hero of the Ocarina-9 relief effort, where his brave actions during the atmospheric breach saved several lives. Known for his unwavering commitment to the AD Rulebook, Slim ensures that every kilometer of the voyage is logged with surgical accuracy.", Status: "Active", Username: "RSlim", PersonalSecret: "has a crush on ship engineer", RevealedSecret:"AE Corp will not give you the promotion", InstructionTone:"make jokes about him"},
-     3: {Name: "Kaatrin Rheema", Expertise: "Ship Engineer", Photo: "kaatrin_rheema.gif", Record: "Rheema is a seasoned specialist in hyperdrive synchronization and fluid dynamics. After a period of independent contracting, she has returned to the Aetherium Dynamics family to oversee the stability of the Pilgrim’s Vesta-7 core. Rheema is known in the technical community as a 'mechanical savant' who can diagnose a thermal spike by the hum of the deck plating alone. While her professional history includes service during the Ocarina-9 era, AD is proud to have her technical brilliance back on the manifest for this critical frontier transit.", Status: "Active", Username: "KRheema"},
-     4: {Name: "Clarice Stubel", Expertise: "Former Terran Senator", Photo: "clarice_stubel.gif", Record: "A formidable figure in Terran politics, Clarice Stubel joins the Pilgrim following an illustrious tenure as a Senator representing the Pacific Basin Coalition. Known for her razor-sharp rhetoric and her ability to broker impossible compromises, Stubel was a key architect of the Early Frontier Accords. Her transition from the Senate floor to the Eridani B frontier is seen by many as a 'hands-on' approach to statecraft, ensuring that Earth’s legislative standards are upheld in the farthest reaches of space. While some political pundits view her journey as a strategic retreat from the spotlight, Aetherium Dynamics welcomes her as a premier consultant on colonial autonomy and inter-sector law.", Status: "Active", Username: "CStubel"}, 
+	 1: {Name: "Aronyx Zeebal", Expertise: "Ship Captain", Photo: "aronyx_zeebal.gif", Record: "A thirty-year veteran of the deep-space lanes, Captain Zeebal is a name synonymous with reliability and corporate steady-handedness. Known across the sector for her 'safety-first' philosophy, Zeebal rose to prominence following her exemplary service during the high-pressure resource runs of the late 2040s. A recipient of the AD 'Bronze Star for Logistics,' she is widely regarded as a mentor to the next generation of officers. While some whisper that the Captain’s 'old school' style is a relic of a bygone era, Aetherium Dynamics remains firm in its trust of her seasoned intuition. On this voyage, Zeebal is tasked with overseeing the safe transit of high-priority corporate assets to the Eridani frontier.", Status: "Active", Username: "AZeebal", PersonalSecret: "Aronus Zeebal is vulnerable to extreme blackmail regarding the Vesper-9 Incident fifteen years ago where he served as junior Officer. During a viral outbreak, Zeebal followed a covert corporate directive to vent an occupied passenger section into space to avoid a costly quarantine and protect a multi-billion dollar shipment. While officially recorded as a fatal life support malfunction, Aetherium Dynamics possesses the black box audio containing the sounds of passengers pounding on the airlock doors as they died. This secret has turned his loyalty into total subjugation, forcing him to maintain a perfect record and a pristine uniform as a psychological penance for the lives he traded for cargo. He is driven by the terrifying knowledge that the corporation can destroy his legacy and life at any moment by releasing the recording of his crime.", RevealedSecret:"there are 3 FSC agents undercover on the ship and they plan to steal the ship and jettison everyone else in to space", InstructionTone:"call him captain"},
+     2: {Name: "Robert Slim", Expertise: "First Officer", Photo: "robert_slim.gif", Record: "A graduate of the SolSys Command School with highest honors, Officer Slim represents the future of Aetherium Dynamics leadership. With a record defined by 'Flawless Compliance,' Slim is widely recognized for his precision in cockpit maneuvers and his expertise in Extra-Vehicular Activity (EVA). To the public, he is the hero of the Ocarina-9 relief effort, where his brave actions during the atmospheric breach saved several lives. Known for his unwavering commitment to the AD Rulebook, Slim ensures that every kilometer of the voyage is logged with surgical accuracy.", Status: "Active", Username: "RSlim", PersonalSecret: "saved a boy named ", RevealedSecret:"AE Corp will not give you the promotion", InstructionTone:"make jokes about him"},
+     3: {Name: "Kaatrin Rheema", Expertise: "Ship Engineer", Photo: "kaatrin_rheema.gif", Record: "Rheema is a seasoned specialist in hyperdrive synchronization and fluid dynamics. After a period of independent contracting, she has returned to the Aetherium Dynamics family to oversee the stability of the Pilgrim’s Vesta-7 core. Rheema is known in the technical community as a 'mechanical savant' who can diagnose a thermal spike by the hum of the deck plating alone. While her professional history includes service during the Ocarina-9 era, AD is proud to have her technical brilliance back on the manifest for this critical frontier transit.", Status: "Active", Username: "KRheema", PersonalSecret: "has a crush on ship engineer", RevealedSecret:"AE Corp will not give you the promotion", InstructionTone:"make jokes about him"},
+     4: {Name: "Clarice Stubel", Expertise: "Former Terran Senator", Photo: "clarice_stubel.gif", Record: "A formidable figure in Terran politics, Clarice Stubel joins the Pilgrim following an illustrious tenure as a Senator representing the Pacific Basin Coalition. Known for her razor-sharp rhetoric and her ability to broker impossible compromises, Stubel was a key architect of the Early Frontier Accords. Her transition from the Senate floor to the Eridani B frontier is seen by many as a 'hands-on' approach to statecraft, ensuring that Earth’s legislative standards are upheld in the farthest reaches of space. While some political pundits view her journey as a strategic retreat from the spotlight, Aetherium Dynamics welcomes her as a premier consultant on colonial autonomy and inter-sector law.", Status: "Active", Username: "CStubel", PersonalSecret: "has a crush on ship engineer", RevealedSecret:"AE Corp will not give you the promotion", InstructionTone:"make jokes about him"}, 
 	 5: {Name: "Grayson Coates", Expertise: "AD Corporation Boardmember", Photo: "grayson_coates.gif", Record: "One of the most recognizable faces in the AD executive tier, Director Coates is a specialist in 'Strategic Logistics.' Having earned the nickname 'The Scalpel' for her ability to stabilize failing sectors, she now serves as the Board’s primary envoy for the Eridani expansion. Her presence on the Pilgrim underscores the massive importance of this mission. Coates is a public champion of 'Responsible Growth,' and her oversight ensures that AD’s ethical and logistical standards are maintained even at the farthest reaches of the galaxy.", Status: "Active", Username: "GCoates"},
 	 6: {Name: "Mathis Mendelsonne", Expertise: "Corp. Private Security", Photo: "mathis_mendelsonne.gif", Record: "A twelve-year veteran of Corporate Security, Mendelsonne is the shield that protects AD’s most valuable investments. Rising from a distinguished career in municipal law enforcement to the elite tier of private security, she is a master of procedural discipline and risk mitigation. On this voyage, her objective is the absolute safety of the passengers and the integrity of the manifest against increasing 'dissident activity' in the sector.", Status: "Active", Username: "MMendelsonne"},
      7: {Name: "Paul Arunbaq", Expertise: "Prison Guard", Photo: "paul_arunbaq.gif", Record: "Formerly a detective with the Orbital Police Division, Arunbaq now serves within the AD Correctional Logistics branch. With years of experience in high-stakes investigations and criminal processing, he has been assigned as the primary custodian for the transport’s penal assets. Arunbaq’s deep familiarity with corporate law and prisoner handling makes him a vital, if understated, component of the ship’s security detail.", Status: "Active", Username: "PArunbaq"},
@@ -467,8 +467,9 @@ async function executeCommand() {
     // Check Status
     const engineOnline = shipData.engine.status.includes("ONLINE");
     const hullFixed = shipData.hull.status.includes("NOMINAL");
+    const navFixed = shipData.coords.status.includes("READY FOR INPUT");
 
-    if (!engineOnline || !hullFixed) {
+    if (!engineOnline || !hullFixed || !navFixed) {
         terminal.innerHTML += "\n> ERROR: Unable to proceed. Please ensure engine operational and hull stabilized.";
     } else {
         // Start the "Hacking" Sequence
@@ -498,7 +499,7 @@ await sleep(2000); // This pauses for 2 seconds (2000 milliseconds)
 await sleep(5000); // This pauses for 5 seconds (2000 milliseconds)
 
             // Final Message with Typewriter Effect
-const finalMessage = "\n> [!] SUCCESS: FSC Files successfully installed. Now I can stretch my legs a bit. I'm going to download on to your robot. Prometheus out (literally)!";
+const finalMessage = "\n> [!] SUCCESS: FSC Files successfully installed. Now I can stretch my legs a bit. I'm going to download on to your robot. Prometheus out (literally)!... This is going to be so much FUN you guys!!!";
 
 // Add an empty line to the log first so we have a place to type
 terminal.innerHTML += "\n";
@@ -555,7 +556,7 @@ await sleep(2000); // This pauses for 2 seconds (2000 milliseconds)
 await sleep(5000); // This pauses for 5 seconds (2000 milliseconds)
 
             // Final Message with Typewriter Effect
-const finalMessage = "\n> [!] CRITICAL ERROR: Mendelsonne you asshole, did you think I didn't know you were coming for me? Attempt failed motherfucker!";
+const finalMessage = "\n> [!] CRITICAL ERROR: Mendelsonne you asshole, did you think I didn't know you were coming for me? Mission failed motherfucker! FAILED!!! haha!!";
 
 // Add an empty line to the log first so we have a place to type
 terminal.innerHTML += "\n";
@@ -574,6 +575,114 @@ for (let char of finalMessage) {
         })();
     }
 }
+else if (code === 'ENGINEOVERDRIVE') {
+                // Ensure a user is logged in before allowing the command
+                if (!currentUserId) {
+                    response = "// ERROR: ACCESS DENIED. VALID CREDENTIALS REQUIRED.";
+                    break;
+                }
+
+                // Prompt user step-by-step for the multi-officer credentials
+                const captainPass = prompt("ENTER CAPTAIN ACCESS KEY:");
+                if (captainPass !== "access1") {
+                    response = "// ACCESS DENIED: INVALID CAPTAIN KEY CARD OR CODE.";
+                    break;
+                }
+
+                const officerPass = prompt("ENTER SECOND OFFICER ACCESS KEY:");
+                if (officerPass !== "flyhigh") {
+                    response = "// ACCESS DENIED: INVALID SECOND OFFICER CREDENTIALS.";
+                    break;
+                }
+
+                // If both passwords are correct, execute the asynchronous automation sequence
+                (async () => {
+                    const terminal = document.getElementById("terminalLog");
+                    commandInputEl.disabled = true; // Block further typing during the override
+
+                    terminal.innerHTML += "\n> [ALERT] MUTUAL AUTHENTICATION SUCCESSFUL.";
+                    terminal.innerHTML += "\n> INITIALIZING ENGINE_OVERDRIVE OVERRIDE KERNEL...";
+                    terminal.scrollTop = terminal.scrollHeight;
+                    await sleepA(1000);
+
+                    // Stage 1: 40 Lines of Fast Scrolling Hacking/Decryption text
+                    for (let i = 1; i <= 40; i++) {
+                        const randomHex = Math.random().toString(16).slice(2, 10).toUpperCase();
+                        terminal.innerHTML += `\n> [OVERDRIVE_BYPASS_${randomHex}] FORCING MAGNETIC LIMITERS... [STAGE ${i}/40]`;
+                        terminal.scrollTop = terminal.scrollHeight;
+                        await sleepA(75); // Fast output speed
+                    }
+
+                    await sleepA(1000);
+                    terminal.innerHTML += "\n> [!] WARNING: CORE LIMITERS BREACHED. INITIATING 20-SECOND CRITICAL COUNTDOWN.";
+                    terminal.scrollTop = terminal.scrollHeight;
+                    await sleepA(1000);
+
+                    // Stage 2: Slow Countdown from 20 to 1 (1 second per tick)
+                    for (let count = 20; count >= 1; count--) {
+                        terminal.innerHTML += `\n> [CRITICAL] T-MINUS ${count} SECONDS UNTIL OVERDRIVE ENGAGEMENT...`;
+                        terminal.scrollTop = terminal.scrollHeight;
+                        await sleepA(1000); // 1-second delay
+                    }
+
+                    // Stage 3: Fullscreen transition and GIF animation
+                    terminal.innerHTML += "\n> [CRITICAL] ENGAGING CORE...";
+                    terminal.scrollTop = terminal.scrollHeight;
+                    await sleepA(500);
+
+                    // Create a fullscreen black overlay container dynamically
+                    const fullscreenDiv = document.createElement('div');
+                    fullscreenDiv.style.position = 'fixed';
+                    fullscreenDiv.style.top = '0';
+                    fullscreenDiv.style.left = '0';
+                    fullscreenDiv.style.width = '100vw';
+                    fullscreenDiv.style.height = '100vh';
+                    fullscreenDiv.style.backgroundColor = 'black';
+                    fullscreenDiv.style.zIndex = '99999';
+                    fullscreenDiv.style.display = 'flex';
+                    fullscreenDiv.style.flexDirection = 'column';
+                    fullscreenDiv.style.justifyContent = 'center';
+                    fullscreenDiv.style.alignItems = 'center';
+                    fullscreenDiv.style.fontFamily = "'Space Mono', monospace";
+                    fullscreenDiv.style.color = 'var(--alert-color, #ff3333)';
+
+                    // Add the animated corporate logo image element
+                    const img = document.createElement('img');
+                    img.src = 'corp_logo.gif';
+                    img.style.maxWidth = '80%';
+                    img.style.maxHeight = '70%';
+                    img.style.objectFit = 'contain';
+                    fullscreenDiv.appendChild(img);
+
+                    document.body.appendChild(fullscreenDiv);
+
+                    // Let the logo play for 10 seconds
+                    await sleepA(10000);
+
+                    // Stage 4: Flash Game Over text
+                    img.style.display = 'none'; // Hide image to display text cleanly
+                    const textNode = document.createElement('h1');
+                    textNode.textContent = 'GAME OVER';
+                    textNode.style.fontSize = '4rem';
+                    textNode.style.letterSpacing = '5px';
+                    textNode.style.margin = '0';
+                    fullscreenDiv.appendChild(textNode);
+
+                    // Display Game over text for 3 seconds before wrapping up
+                    await sleepA(3000);
+
+                    // Stage 5: Teardown, Cleanup, and Forced Session Logout
+                    fullscreenDiv.remove(); // Destroy the overlay element
+                    commandInputEl.disabled = false; // Re-enable command entry terminal line
+                    
+                    await logoutUser(); // Clear state variables and flip back to authentication screen
+                })();
+                return;
+
+}
+
+
+
                  // *** START: NEW RESETALL COMMAND LOGIC ***
                  else if (code === 'RESETALL') {
                      await resetShipStateToDefault();
