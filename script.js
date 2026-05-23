@@ -1,7 +1,7 @@
 // --- FIREBASE INTEGRATION ---
 // Your web app's Firebase configuration
 const firebaseConfig = {
-    apiKey: "AIzaSyDCVcBvUSj00yOct06up6jcdrG5z8mR8yE",
+    apiKey: "AIzaSyBn_xPcScLLuB-54UxfzzNb0BX-BEOqkwE",
     authDomain: "pilgrim-os.firebaseapp.com",
     projectId: "pilgrim-os",
     storageBucket: "pilgrim-os.firebasestorage.app",
@@ -25,7 +25,7 @@ const CENTRAL_SHIP_PATH = 'shipState'; // <--- NEW CENTRAL NODE
 
 // --- GEMINI CHAT INTEGRATION ---
 // IMPORTANT: Replace 'YOUR_API_KEY_HERE' with your actual Gemini API Key
-const GEMINI_API_KEY = "AIzaSyDCVcBvUSj00yOct06up6jcdrG5z8mR8yE"; 
+const GEMINI_API_KEY = "AIzaSyBn_xPcScLLuB-54UxfzzNb0BX-BEOqkwE"; 
 let geminiAI; 
 let chatSession; 
 // --- END GEMINI CHAT INTEGRATION ---
